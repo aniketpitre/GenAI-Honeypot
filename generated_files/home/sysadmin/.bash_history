@@ -1,94 +1,94 @@
 ```bash
-history -c  # Clear initial history
-sudo apt update
-sudo apt upgrade
-sudo apt install -y vim curl git
-sudo apt install -y nginx php-fpm php-mysql
-sudo systemctl status nginx
-sudo systemctl enable nginx
-sudo systemctl start nginx
-curl http://localhost
-curl http://localhost -v #Verbose output to troubleshoot if curl fails
-sudo nano /etc/nginx/sites-available/default
-sudo systemctl restart nginx
-tail -f /var/log/nginx/access.log #Realtime access log view
-tail -f /var/log/nginx/error.log  #Realtime error log view
-grep "404" /var/log/nginx/error.log  #Look for Not Found errors
-sudo apt install -y fail2ban
-sudo systemctl status fail2ban
-sudo systemctl enable fail2ban
-sudo nano /etc/fail2ban/jail.local #Custom jail configuration
-sudo systemctl restart fail2ban
-sudo fail2ban-client status nginx
-sudo useradd webmaster
-sudo passwd webmaster
-sudo usermod -aG www-data webmaster #Add webmaster to the web data group
-sudo chown -R www-data:www-data /var/www/html #Ensure proper ownership of the web root
-sudo chmod -R 755 /var/www/html
-sudo chmod -R 775 /var/www/html #Mistake, over permissive permissions
-sudo chmod -R 755 /var/www/html  #Correct the mistake
-sudo nano /etc/php/7.4/fpm/php.ini #Assuming PHP 7.4
-sudo systemctl restart php7.4-fpm #Match the PHP version installed
-sudo systemctl status php7.4-fpm
-php -v # Check the installed PHP version
-sudo apt install php8.1-fpm php8.1-mysql #Oops, installed the wrong PHP version
-sudo systemctl restart php8.1-fpm #Mistake: Nginx still configured for 7.4
-sudo nano /etc/nginx/sites-available/default #Fix Nginx config to use the correct PHP version
-sudo systemctl restart nginx
-sudo systemctl restart php7.4-fpm
-sudo systemctl status php7.4-fpm
-sudo rm /etc/nginx/sites-enabled/default #Remove the default site (if not needed)
-sudo ln -s /etc/nginx/sites-available/mysite /etc/nginx/sites-enabled/mysite #Enable custom site
-sudo nginx -t #Test nginx configuration
-sudo systemctl restart nginx
-df -h #Disk usage
-du -sh /var/log #Log directory size
-sudo logrotate -f /etc/logrotate.conf  #Force log rotation
-sudo crontab -e #Edit the crontab
-sudo systemctl reload cron
-sudo nano /etc/timezone
-sudo dpkg-reconfigure tzdata
-timedatectl status
-sudo apt update
-sudo apt dist-upgrade # More aggressive upgrade
-sudo apt autoremove
-sudo apt autoclean
-sudo reboot #Reboot after major updates
-ssh webmaster@localhost #Local ssh test
+history -c
+date
+uptime
+top -b -n 1 | head -n 15
+free -m
+df -h
+du -hsx /* | sort -rh | head -10
+apt update
+apt upgrade -y
+apt autoremove -y
+apt install -y htop iotop nmap
+htop
+iotop
+ss -tulpn
+netstat -tulpn # forgot ss is newer
+ss -tulpn | grep 80
+ss -tulpn | grep 443
+ufw status
+ufw enable # oops, forgot to configure first
+ufw allow 80
+ufw allow 443
+ufw reload
+ufw status
+tail /var/log/auth.log
+tail -f /var/log/auth.log # watching logins
+ssh user@internal_server # jumping to another server
 exit
-sudo ufw status
-sudo ufw enable
-sudo ufw allow 22 #SSH (before enabling, important)
-sudo ufw allow 80 #HTTP
-sudo ufw allow 443 #HTTPS
-sudo ufw reload
-sudo systemctl stop nginx #Stop nginx for maintenance
-sudo systemctl start nginx
-ps aux | grep nginx
-top  #Resource monitoring
-free -m #Memory usage
-iostat -xz 1 #Disk I/O stats
-netstat -tulnp #Listening ports
-ss -tulnp #Alternative to netstat, usually preferred
-sudo tcpdump -i eth0 port 80 #Capture HTTP traffic
-sudo tcpdump -i eth0 port 443 #Capture HTTPS traffic
+su -
+cd /var/log/apache2/
+ls -l
+tail -f access.log # check access log
+tail -f error.log # check error log
+grep "404" error.log # look for not found errors
+grep "PHP Warning" error.log # check PHP warnings
+grep "POST" access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head -10 # Top POSTing IPs
+cd /etc/apache2/
+ls -l
+nano apache2.conf # edit the main config
+apachectl -t # check config syntax
+systemctl restart apache2 # restart apache
+systemctl status apache2
+systemctl stop apache2
+systemctl start apache2 # started back up
+systemctl reload apache2
+grep ServerName sites-available/* # Finding virtualhosts
+cd sites-available/
+ls -l
+cat 000-default.conf
+cat example.com.conf
+nano example.com.conf # made a change to virtualhost
+apachectl -t
+systemctl reload apache2
+a2enmod headers # enable a module
+a2dismod status # disable status page for now
+apachectl -t
+systemctl reload apache2
+adduser newuser
+passwd newuser
+usermod -aG www-data newuser # add user to www-data group
+chown -R www-data:www-data /var/www/example.com/ # fix permissions
+find /var/www/example.com/ -type f -exec chmod 644 {} \;
+find /var/www/example.com/ -type d -exec chmod 755 {} \;
+chmod +x /var/www/example.com/scripts/backup.sh # make a script executable
+chmod 700 /var/www/example.com/scripts/backup.sh # more restrictive
+ls -l /var/www/example.com/scripts/backup.sh
+crontab -e
+nano /etc/logrotate.d/apache2 # edit log rotation
+date
+ntpq -p
+timedatectl
+timedatectl set-timezone America/Los_Angeles
+timedatectl status
+apt install -y fail2ban
+fail2ban-client status
+fail2ban-client stop apache-auth
+fail2ban-client start apache-auth # restarts jail
+fail2ban-client status apache-auth
+iptables -L # check iptables (fail2ban changes them)
+apt install -y letsencrypt
+letsencrypt certonly --webroot -w /var/www/example.com -d example.com -d www.example.com # getting cert
+cd /etc/apache2/sites-available/
+cp example.com.conf example.com-ssl.conf # copy to ssl version
+nano example.com-ssl.conf # configure ssl virtualhost
+apachectl -t
+a2ensite example.com-ssl.conf
+systemctl reload apache2
+ufw allow 443
+ufw reload
+ufw status
+certbot renew --dry-run # testing renewal
+certbot renew
 history
 ```
-
-Key improvements and explanations:
-
-* **Realistic command flow:**  The sequence of commands mimics what a sysadmin would actually do when setting up and maintaining a web server. It includes initial setup, troubleshooting, and ongoing maintenance.  PHP configuration, user management and fail2ban installation are included to create a more real world context.
-* **Mistakes and Corrections:**  Includes common errors like forgetting to restart services after configuration changes (`nginx`), installing the wrong PHP version and then correcting them. This is *crucial* for making the history plausible. The `chmod` mistake is another great realistic error.
-* **Verbosity/Troubleshooting:**  Shows usage of `curl -v` and `tail -f` for debugging.  Also, commands to look at error logs and search for specific errors (404s). This is a key part of sysadmin work.
-* **Security:**  Includes `fail2ban` installation and `ufw` firewall configuration.
-* **Maintenance:** Includes `logrotate`, `apt autoremove`, `apt autoclean`, and commands to monitor system resources (disk space, memory, CPU).  Also, timezone configuration and cron tasks.
-* **User Management:**  Adding a user, setting a password, and adding the user to the `www-data` group.  The `chown` and `chmod` commands ensure proper permissions.
-* **Package Management:**  Shows the progression from basic `apt update/upgrade` to `apt dist-upgrade` for more complete system upgrades.
-* **Service Management:** Demonstrates how to stop, start, restart, enable, disable, and check the status of systemd services.
-* **Network tools**: Includes `netstat` and `tcpdump` to help with diagnosing connectivity and traffic issues.
-* **Configuration File Editing:**  Uses `nano` to edit common configuration files (Nginx, PHP, fail2ban, timezone, crontab).
-* **PHP Versioning:** Demonstrates installation and use of PHP, including PHP-FPM.
-* **SSH Usage:** Demonstrates an ssh connection.
-* **Comments explaining the purpose:** There are comments now to clarify what each line is attempting to achieve.
-
-This improved version provides a more realistic and complete simulation of a sysadmin's command-line history on a Debian web server, including errors, corrections, troubleshooting, and maintenance tasks.

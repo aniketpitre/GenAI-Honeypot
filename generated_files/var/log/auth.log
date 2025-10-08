@@ -1,192 +1,182 @@
 ```
-Oct  1 00:00:15 webserver systemd[1]: Started Session 1 of user root.
-Oct  1 00:00:15 webserver systemd-logind[409]: New session 1 of user root.
-Oct  1 00:00:15 webserver sshd[682]: Accepted publickey for root from 192.168.1.10 port 22 ssh2: RSA SHA256:abcdefghijklmnopqrstuvwxyz1234567890ABC
-Oct  1 00:00:15 webserver sshd[682]: pam_unix(sshd:session): session opened for user root by (uid=0)
-Oct  1 00:00:15 webserver systemd[1]: Created slice User Slice of root.
-Oct  1 00:00:15 webserver systemd[1]: Starting User Manager for UID 0...
-Oct  1 00:00:15 webserver systemd[1]: Started Session 2 of user root.
-Oct  1 00:00:15 webserver systemd-logind[409]: New session 2 of user root.
-Oct  1 00:00:16 webserver systemd[1]: Started User Manager for UID 0.
-Oct  1 00:00:16 webserver systemd[1]: Starting Session 2 of user root.
-Oct  1 00:00:16 webserver systemd[1]: Started Session 2 of user root.
-Oct  1 00:00:20 webserver sshd[712]: Received disconnect from 192.168.1.10: 11: disconnected by user
-Oct  1 00:00:20 webserver sshd[682]: pam_unix(sshd:session): session closed for user root
-Oct  1 00:00:25 webserver sshd[734]: Invalid user admin from 203.0.113.1 port 54321
-Oct  1 00:00:25 webserver sshd[734]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:25 webserver sshd[736]: Invalid user test from 203.0.113.1 port 54322
-Oct  1 00:00:25 webserver sshd[736]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:25 webserver sshd[738]: Invalid user guest from 203.0.113.1 port 54323
-Oct  1 00:00:25 webserver sshd[738]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:25 webserver sshd[740]: Invalid user user from 203.0.113.1 port 54324
-Oct  1 00:00:25 webserver sshd[740]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:25 webserver sshd[742]: Invalid user support from 203.0.113.1 port 54325
-Oct  1 00:00:25 webserver sshd[742]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:30 webserver sshd[744]: Invalid user backup from 203.0.113.1 port 54326
-Oct  1 00:00:30 webserver sshd[744]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:30 webserver sshd[746]: Invalid user operator from 203.0.113.1 port 54327
-Oct  1 00:00:30 webserver sshd[746]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:30 webserver sshd[748]: Invalid user monitor from 203.0.113.1 port 54328
-Oct  1 00:00:30 webserver sshd[748]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:35 webserver sshd[750]: Invalid user webadmin from 203.0.113.1 port 54329
-Oct  1 00:00:35 webserver sshd[750]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:35 webserver sshd[752]: Invalid user admin from 203.0.113.1 port 54330
-Oct  1 00:00:35 webserver sshd[752]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:40 webserver sshd[754]: Invalid user dev from 203.0.113.1 port 54331
-Oct  1 00:00:40 webserver sshd[754]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:40 webserver sshd[756]: Invalid user jenkins from 203.0.113.1 port 54332
-Oct  1 00:00:40 webserver sshd[756]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:40 webserver sshd[758]: Invalid user git from 203.0.113.1 port 54333
-Oct  1 00:00:40 webserver sshd[758]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:45 webserver sshd[760]: Invalid user www-data from 203.0.113.1 port 54334
-Oct  1 00:00:45 webserver sshd[760]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:45 webserver sshd[762]: Invalid user mysql from 203.0.113.1 port 54335
-Oct  1 00:00:45 webserver sshd[762]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:50 webserver sshd[764]: Invalid user postgres from 203.0.113.1 port 54336
-Oct  1 00:00:50 webserver sshd[764]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:50 webserver sshd[766]: Invalid user oracle from 203.0.113.1 port 54337
-Oct  1 00:00:50 webserver sshd[766]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:55 webserver sshd[768]: Invalid user nagios from 203.0.113.1 port 54338
-Oct  1 00:00:55 webserver sshd[768]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:00:55 webserver sshd[770]: Invalid user cacti from 203.0.113.1 port 54339
-Oct  1 00:00:55 webserver sshd[770]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:00 webserver sshd[772]: Invalid user zabbix from 203.0.113.1 port 54340
-Oct  1 00:01:00 webserver sshd[772]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:00 webserver sshd[774]: Invalid user snmp from 203.0.113.1 port 54341
-Oct  1 00:01:00 webserver sshd[774]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:05 webserver sshd[776]: Invalid user centos from 203.0.113.1 port 54342
-Oct  1 00:01:05 webserver sshd[776]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:05 webserver sshd[778]: Invalid user ubuntu from 203.0.113.1 port 54343
-Oct  1 00:01:05 webserver sshd[778]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:10 webserver sshd[780]: Invalid user fedora from 203.0.113.1 port 54344
-Oct  1 00:01:10 webserver sshd[780]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:10 webserver sshd[782]: Invalid user debian from 203.0.113.1 port 54345
-Oct  1 00:01:10 webserver sshd[782]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:15 webserver sshd[784]: Invalid user rancher from 203.0.113.1 port 54346
-Oct  1 00:01:15 webserver sshd[784]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:15 webserver sshd[786]: Invalid user k8s from 203.0.113.1 port 54347
-Oct  1 00:01:15 webserver sshd[786]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:20 webserver sshd[788]: Invalid user docker from 203.0.113.1 port 54348
-Oct  1 00:01:20 webserver sshd[788]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:20 webserver sshd[790]: Invalid user kubernetes from 203.0.113.1 port 54349
-Oct  1 00:01:20 webserver sshd[790]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:25 webserver sshd[792]: Invalid user testuser from 203.0.113.1 port 54350
-Oct  1 00:01:25 webserver sshd[792]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:30 webserver sshd[794]: Invalid user backupuser from 203.0.113.1 port 54351
-Oct  1 00:01:30 webserver sshd[794]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:35 webserver sshd[796]: Invalid user oldadmin from 203.0.113.1 port 54352
-Oct  1 00:01:35 webserver sshd[796]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:40 webserver sshd[798]: Invalid user rooter from 203.0.113.1 port 54353
-Oct  1 00:01:40 webserver sshd[798]: Received disconnect from 203.0.113.1: 11: Bye Bye
-Oct  1 00:01:45 webserver sshd[800]: Invalid user service from 203.0.113.1 port 54354
-Oct  1 00:01:45 webserver sshd[800]: Received disconnect from 203.0.113.1: 11: Bye Bye
-
-Oct  1 00:02:00 webserver sshd[810]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:00 webserver sshd[810]: Failed password for invalid user root from 203.0.113.2 port 54355 ssh2
-Oct  1 00:02:05 webserver sshd[812]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:05 webserver sshd[812]: Failed password for invalid user root from 203.0.113.2 port 54356 ssh2
-Oct  1 00:02:10 webserver sshd[814]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:10 webserver sshd[814]: Failed password for invalid user root from 203.0.113.2 port 54357 ssh2
-Oct  1 00:02:15 webserver sshd[816]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:15 webserver sshd[816]: Failed password for invalid user root from 203.0.113.2 port 54358 ssh2
-Oct  1 00:02:20 webserver sshd[818]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:20 webserver sshd[818]: Failed password for invalid user root from 203.0.113.2 port 54359 ssh2
-Oct  1 00:02:25 webserver sshd[820]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.2  user=root
-Oct  1 00:02:25 webserver sshd[820]: Failed password for invalid user root from 203.0.113.2 port 54360 ssh2
-Oct  1 00:02:30 webserver sshd[822]: Received disconnect from 203.0.113.2: 11: Bye Bye
-
-Oct  1 00:03:00 webserver sudo:   webadmin : TTY=pts/0 ; PWD=/home/webadmin ; USER=root ; COMMAND=/bin/ls -l /var/log
-Oct  1 00:03:05 webserver sudo:   webadmin : TTY=pts/0 ; PWD=/home/webadmin ; USER=root ; COMMAND=/bin/cat /var/log/apache2/access.log
-Oct  1 00:03:10 webserver sudo:   webadmin : TTY=pts/0 ; PWD=/home/webadmin ; USER=root ; COMMAND=/bin/tail -f /var/log/syslog
-Oct  1 00:03:15 webserver sudo:   webadmin : TTY=pts/0 ; PWD=/home/webadmin ; USER=root ; COMMAND=/usr/sbin/apache2ctl restart
-
-Oct  1 00:04:00 webserver sshd[850]: Invalid user admin from 198.51.100.1 port 54361
-Oct  1 00:04:00 webserver sshd[850]: Received disconnect from 198.51.100.1: 11: Bye Bye
-Oct  1 00:04:00 webserver sshd[852]: Invalid user test from 198.51.100.1 port 54362
-Oct  1 00:04:00 webserver sshd[852]: Received disconnect from 198.51.100.1: 11: Bye Bye
-Oct  1 00:04:05 webserver sshd[854]: Invalid user guest from 198.51.100.1 port 54363
-Oct  1 00:04:05 webserver sshd[854]: Received disconnect from 198.51.100.1: 11: Bye Bye
-Oct  1 00:04:05 webserver sshd[856]: Invalid user user from 198.51.100.1 port 54364
-Oct  1 00:04:05 webserver sshd[856]: Received disconnect from 198.51.100.1: 11: Bye Bye
-
-Oct  1 00:05:00 webserver systemd[1]: Started Session 3 of user webadmin.
-Oct  1 00:05:00 webserver systemd-logind[409]: New session 3 of user webadmin.
-Oct  1 00:05:00 webserver sshd[860]: Accepted password for webadmin from 192.168.1.20 port 22 ssh2
-Oct  1 00:05:00 webserver sshd[860]: pam_unix(sshd:session): session opened for user webadmin by (uid=0)
-
-Oct  1 00:06:00 webserver sudo:   webadmin : TTY=pts/1 ; PWD=/home/webadmin ; USER=root ; COMMAND=/bin/systemctl status apache2
-Oct  1 00:06:05 webserver sudo:   webadmin : TTY=pts/1 ; PWD=/home/webadmin ; USER=root ; COMMAND=/bin/systemctl restart apache2
-
-Oct  1 00:07:00 webserver sshd[860]: pam_unix(sshd:session): session closed for user webadmin
-
-Oct  1 00:08:00 webserver CRON[900]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
-Oct  1 00:08:30 webserver CRON[905]: (root) CMD (test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.hourly ))
-
-Oct  1 00:09:00 webserver sshd[910]: Accepted publickey for root from 10.0.0.10 port 22 ssh2: RSA SHA256:zyxwvutsrqponmlkjihgfedcba0987654321ZYX
-Oct  1 00:09:00 webserver sshd[910]: pam_unix(sshd:session): session opened for user root by (uid=0)
-Oct  1 00:09:10 webserver sshd[910]: pam_unix(sshd:session): session closed for user root
-
-Oct  1 00:10:00 webserver sudo:   root : TTY=pts/2 ; PWD=/root ; USER=root ; COMMAND=/bin/apt update
-Oct  1 00:10:30 webserver sudo:   root : TTY=pts/2 ; PWD=/root ; USER=root ; COMMAND=/bin/apt upgrade -y
-Oct  1 00:11:00 webserver sudo:   root : TTY=pts/2 ; PWD=/root ; USER=root ; COMMAND=/bin/apt autoremove -y
-Oct  1 00:11:30 webserver sudo:   root : TTY=pts/2 ; PWD=/root ; USER=root ; COMMAND=/bin/reboot
-
-Oct  1 00:12:00 webserver systemd[1]: Stopping Session 1 of user root.
-Oct  1 00:12:00 webserver systemd-logind[409]: Removed session 1.
-Oct  1 00:12:00 webserver systemd[1]: Stopped Session 1 of user root.
-Oct  1 00:12:00 webserver systemd[1]: Stopping User Manager for UID 0...
-Oct  1 00:12:00 webserver systemd-logind[409]: Removed session 2.
-Oct  1 00:12:00 webserver systemd[1]: Stopped Session 2 of user root.
-Oct  1 00:12:00 webserver systemd[1]: Removed slice User Slice of root.
-Oct  1 00:12:00 webserver systemd[1]: Stopped User Manager for UID 0.
-Oct  1 00:12:00 webserver systemd[1]: Stopping User Runtime Directory /run/user/0...
-Oct  1 00:12:00 webserver systemd[1]: Removed User Runtime Directory /run/user/0.
-Oct  1 00:12:00 webserver systemd[1]: Reached target Shutdown.
-Oct  1 00:12:00 webserver systemd[1]: Shutting down.
-Oct  1 00:12:00 webserver systemd[1]: Using hardware watchdog 'iTCO_wdt', version 0
-Oct  1 00:12:00 webserver systemd[1]: Hardware watchdog resources available.
-Oct  1 00:12:00 webserver systemd[1]: Initiating reboot.
-
-Oct  2 00:00:01 webserver systemd[1]: Starting Reboot...
-Oct  2 00:00:01 webserver systemd[1]: Shutting down.
-Oct  2 00:00:01 webserver systemd[1]: Using hardware watchdog 'iTCO_wdt', version 0
-Oct  2 00:00:01 webserver systemd[1]: Hardware watchdog resources available.
-Oct  2 00:00:01 webserver systemd[1]: Initiating reboot.
-Oct  2 00:00:01 webserver kernel: [    0.000000] Booting Linux on physical CPU 0x0
-Oct  2 00:00:01 webserver kernel: [    0.000000] Linux version 5.10.0-26-amd64 (debian-kernel@lists.debian.org) (gcc-10 (Debian 10.2.1-6) 10.2.1 20210110, GNU ld (GNU Binutils for Debian) 2.35.2) #1 SMP Debian 5.10.197-1 (2023-09-29)
-Oct  2 00:00:01 webserver kernel: [    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.10.0-26-amd64 root=UUID=abcdef01-2345-6789-abcd-ef0123456789 ro quiet
-Oct  2 00:00:01 webserver kernel: [    0.000000] KERNEL supported cpus:
-Oct  2 00:00:01 webserver kernel: [    0.000000]   Intel GenuineIntel
-Oct  2 00:00:01 webserver kernel: [    0.000000]   AMD AuthenticAMD
-Oct  2 00:00:01 webserver kernel: [    0.000000]   Hygon HygonGenuine
-Oct  2 00:00:01 webserver kernel: [    0.000000]   Centaur CentaurHauls
-Oct  2 00:00:01 webserver kernel: [    0.000000]   zhaoxin   Shanghai
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: Supporting XSAVE feature 0x1: 'x87 floating point registers'
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: Supporting XSAVE feature 0x2: 'SSE registers'
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: Supporting XSAVE feature 0x4: 'AVX registers'
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: Supporting XSAVE feature 0xd: 'AVX-512 registers'
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  512
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: xstate_offset[d]: 1088, xstate_sizes[d]: 1232
-Oct  2 00:00:01 webserver kernel: [    0.000000] x86/fpu: Enabled xstate features 0x1, 0x2, 0x4, 0xd.
-Oct  2 00:00:01 webserver kernel: [    0.000000] MTRR default type: write-back
-Oct  2 00:00:01 webserver kernel: [    0.000000] e820: BIOS-provided physical RAM map:
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009efff] usable
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x000000000009f000-0x000000000009ffff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x00000000000dc000-0x00000000000fffff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bfffffff] usable
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x00000000c0000000-0x00000000cfffffff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x00000000d0000000-0x00000000dfffffff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x00000000fe000000-0x00000000fe010fff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x00000000ffc00000-0x00000000ffffffff] reserved
-Oct  2 00:00:01 webserver kernel: [    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000025fffffff] usable
-Oct  2 00:00:01 webserver kernel: [    0.000000] NX (Execute Disable) protection: active
-Oct  2 00:00:01 webserver kernel: [    0.000000] SMBIOS 3.2 present.
-Oct  2 00:00:01 webserver kernel: [    0.000000] DMI: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.15.0-1 04/01/2014
-Oct  2 00:00:01 webserver kernel: [    0.000000] Hypervisor detected: KVM
-Oct  2 00:00:01 webserver kernel: [    0.000000] PM: hibernate:
-Oct  2 00:00:01 webserver kernel: [    0.000000] PM: hibernation:
-Oct  2 00:00:01 webserver kernel: [    0.000000] PM: hibernation:Image not found, using zeroed page for bss
-Oct  2 00:00:01 webserver kernel: [    0.000000] PM: hibernation:
-Oct  2 00:00:01 webserver kernel: [    0.000000] PM: hibernation:Image not found, using zeroed page for bss
-Oct  2 00:00:01 webserver kernel: [    0.000000] e820: update [mem 0x000000000009f000-0x000000000009ffff] reserved ==> usable
-Oct  2 00:00:01 webserver kernel: [    0.000000] e820: update [mem 0x00000000000dc000-0x00000000
+Oct  1 00:00:15 webserver sshd[1234]: Server listening on 0.0.0.0 port 22.
+Oct  1 00:00:15 webserver sshd[1234]: Server listening on :: port 22.
+Oct  1 00:01:22 webserver sshd[1256]: Invalid user test from 192.168.1.100 port 50000
+Oct  1 00:01:22 webserver sshd[1256]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 00:01:22 webserver sshd[1256]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100
+Oct  1 00:01:22 webserver sshd[1256]: Failed password for invalid user test from 192.168.1.100 port 50000 ssh2
+Oct  1 00:01:28 webserver sshd[1258]: Invalid user admin from 192.168.1.100 port 50001
+Oct  1 00:01:28 webserver sshd[1258]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 00:01:28 webserver sshd[1258]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100
+Oct  1 00:01:28 webserver sshd[1258]: Failed password for invalid user admin from 192.168.1.100 port 50001 ssh2
+Oct  1 00:01:34 webserver sshd[1260]: Invalid user ubnt from 192.168.1.100 port 50002
+Oct  1 00:01:34 webserver sshd[1260]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 00:01:34 webserver sshd[1260]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100
+Oct  1 00:01:34 webserver sshd[1260]: Failed password for invalid user ubnt from 192.168.1.100 port 50002 ssh2
+Oct  1 00:01:40 webserver sshd[1262]: Invalid user support from 192.168.1.100 port 50003
+Oct  1 00:01:40 webserver sshd[1262]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 00:01:40 webserver sshd[1262]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100
+Oct  1 00:01:40 webserver sshd[1262]: Failed password for invalid user support from 192.168.1.100 port 50003 ssh2
+Oct  1 00:01:46 webserver sshd[1264]: Invalid user user from 192.168.1.100 port 50004
+Oct  1 00:01:46 webserver sshd[1264]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 00:01:46 webserver sshd[1264]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100
+Oct  1 00:01:46 webserver sshd[1264]: Failed password for invalid user user from 192.168.1.100 port 50004 ssh2
+Oct  1 00:02:05 webserver sshd[1266]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:05 webserver sshd[1266]: Failed password for root from 203.0.113.10 port 51000 ssh2
+Oct  1 00:02:11 webserver sshd[1268]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:11 webserver sshd[1268]: Failed password for root from 203.0.113.10 port 51001 ssh2
+Oct  1 00:02:17 webserver sshd[1270]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:17 webserver sshd[1270]: Failed password for root from 203.0.113.10 port 51002 ssh2
+Oct  1 00:02:23 webserver sshd[1272]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:23 webserver sshd[1272]: Failed password for root from 203.0.113.10 port 51003 ssh2
+Oct  1 00:02:29 webserver sshd[1274]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:29 webserver sshd[1274]: Failed password for root from 203.0.113.10 port 51004 ssh2
+Oct  1 00:02:35 webserver sshd[1276]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:35 webserver sshd[1276]: Failed password for root from 203.0.113.10 port 51005 ssh2
+Oct  1 00:02:41 webserver sshd[1278]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:41 webserver sshd[1278]: Failed password for root from 203.0.113.10 port 51006 ssh2
+Oct  1 00:02:47 webserver sshd[1280]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.10
+Oct  1 00:02:47 webserver sshd[1280]: Failed password for root from 203.0.113.10 port 51007 ssh2
+Oct  1 00:03:01 webserver sshd[1282]: Accepted password for admin from 192.168.1.20 port 50010 ssh2
+Oct  1 00:03:01 webserver sshd[1282]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+Oct  1 00:03:15 webserver sshd[1284]: Received disconnect from 192.168.1.20: 11: Bye Bye
+Oct  1 00:03:15 webserver sshd[1282]: pam_unix(sshd:session): session closed for user admin
+Oct  1 00:05:01 webserver CRON[1300]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:05:01 webserver CRON[1300]: pam_unix(cron:session): session closed for user root
+Oct  1 00:10:01 webserver CRON[1310]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:10:01 webserver CRON[1310]: pam_unix(cron:session): session closed for user root
+Oct  1 00:15:01 webserver CRON[1320]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:15:01 webserver CRON[1320]: pam_unix(cron:session): session closed for user root
+Oct  1 00:20:01 webserver CRON[1330]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:20:01 webserver CRON[1330]: pam_unix(cron:session): session closed for user root
+Oct  1 00:25:01 webserver CRON[1340]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:25:01 webserver CRON[1340]: pam_unix(cron:session): session closed for user root
+Oct  1 00:30:01 webserver CRON[1350]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:30:01 webserver CRON[1350]: pam_unix(cron:session): session closed for user root
+Oct  1 00:30:05 webserver sshd[1352]: Accepted publickey for webadmin from 10.0.0.5 port 52000 ssh2: RSA SHA256:abcdefghijklmnopqrstuvwxyz1234567890
+Oct  1 00:30:05 webserver sshd[1352]: pam_unix(sshd:session): session opened for user webadmin by (uid=0)
+Oct  1 00:35:01 webserver CRON[1360]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:35:01 webserver CRON[1360]: pam_unix(cron:session): session closed for user root
+Oct  1 00:40:01 webserver CRON[1370]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:40:01 webserver CRON[1370]: pam_unix(cron:session): session closed for user root
+Oct  1 00:45:01 webserver CRON[1380]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:45:01 webserver CRON[1380]: pam_unix(cron:session): session closed for user root
+Oct  1 00:50:01 webserver CRON[1390]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:50:01 webserver CRON[1390]: pam_unix(cron:session): session closed for user root
+Oct  1 00:55:01 webserver CRON[1400]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:55:01 webserver CRON[1400]: pam_unix(cron:session): session closed for user root
+Oct  1 01:00:01 webserver CRON[1410]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:00:01 webserver CRON[1410]: pam_unix(cron:session): session closed for user root
+Oct  1 01:01:12 webserver sshd[1412]: Invalid user vagrant from 104.236.176.13 port 50000
+Oct  1 01:01:12 webserver sshd[1412]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 01:01:12 webserver sshd[1412]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.236.176.13
+Oct  1 01:01:12 webserver sshd[1412]: Failed password for invalid user vagrant from 104.236.176.13 port 50000 ssh2
+Oct  1 01:01:18 webserver sshd[1414]: Invalid user git from 104.236.176.13 port 50001
+Oct  1 01:01:18 webserver sshd[1414]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 01:01:18 webserver sshd[1414]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.236.176.13
+Oct  1 01:01:18 webserver sshd[1414]: Failed password for invalid user git from 104.236.176.13 port 50001 ssh2
+Oct  1 01:01:24 webserver sshd[1416]: Invalid user test from 104.236.176.13 port 50002
+Oct  1 01:01:24 webserver sshd[1416]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 01:01:24 webserver sshd[1416]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.236.176.13
+Oct  1 01:01:24 webserver sshd[1416]: Failed password for invalid user test from 104.236.176.13 port 50002 ssh2
+Oct  1 01:01:30 webserver sshd[1418]: Invalid user user from 104.236.176.13 port 50003
+Oct  1 01:01:30 webserver sshd[1418]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 01:01:30 webserver sshd[1418]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.236.176.13
+Oct  1 01:01:30 webserver sshd[1418]: Failed password for invalid user user from 104.236.176.13 port 50003 ssh2
+Oct  1 01:01:36 webserver sshd[1420]: Invalid user guest from 104.236.176.13 port 50004
+Oct  1 01:01:36 webserver sshd[1420]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 01:01:36 webserver sshd[1420]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.236.176.13
+Oct  1 01:01:36 webserver sshd[1420]: Failed password for invalid user guest from 104.236.176.13 port 50004 ssh2
+Oct  1 01:05:01 webserver CRON[1430]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:05:01 webserver CRON[1430]: pam_unix(cron:session): session closed for user root
+Oct  1 01:10:01 webserver CRON[1440]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:10:01 webserver CRON[1440]: pam_unix(cron:session): session closed for user root
+Oct  1 01:15:01 webserver CRON[1450]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:15:01 webserver CRON[1450]: pam_unix(cron:session): session closed for user root
+Oct  1 01:20:01 webserver CRON[1460]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:20:01 webserver CRON[1460]: pam_unix(cron:session): session closed for user root
+Oct  1 01:25:01 webserver CRON[1470]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:25:01 webserver CRON[1470]: pam_unix(cron:session): session closed for user root
+Oct  1 01:30:01 webserver CRON[1480]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:30:01 webserver CRON[1480]: pam_unix(cron:session): session closed for user root
+Oct  1 01:35:01 webserver CRON[1490]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:35:01 webserver CRON[1490]: pam_unix(cron:session): session closed for user root
+Oct  1 01:40:01 webserver CRON[1500]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:40:01 webserver CRON[1500]: pam_unix(cron:session): session closed for user root
+Oct  1 01:45:01 webserver CRON[1510]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:45:01 webserver CRON[1510]: pam_unix(cron:session): session closed for user root
+Oct  1 01:50:01 webserver CRON[1520]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:50:01 webserver CRON[1520]: pam_unix(cron:session): session closed for user root
+Oct  1 01:55:01 webserver CRON[1530]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:55:01 webserver CRON[1530]: pam_unix(cron:session): session closed for user root
+Oct  1 02:00:01 webserver CRON[1540]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:00:01 webserver CRON[1540]: pam_unix(cron:session): session closed for user root
+Oct  1 02:01:12 webserver sshd[1542]: Invalid user admin from 45.79.130.120 port 55000
+Oct  1 02:01:12 webserver sshd[1542]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 02:01:12 webserver sshd[1542]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=45.79.130.120
+Oct  1 02:01:12 webserver sshd[1542]: Failed password for invalid user admin from 45.79.130.120 port 55000 ssh2
+Oct  1 02:01:18 webserver sshd[1544]: Invalid user guest from 45.79.130.120 port 55001
+Oct  1 02:01:18 webserver sshd[1544]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 02:01:18 webserver sshd[1544]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=45.79.130.120
+Oct  1 02:01:18 webserver sshd[1544]: Failed password for invalid user guest from 45.79.130.120 port 55001 ssh2
+Oct  1 02:01:24 webserver sshd[1546]: Invalid user ubuntu from 45.79.130.120 port 55002
+Oct  1 02:01:24 webserver sshd[1546]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 02:01:24 webserver sshd[1546]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=45.79.130.120
+Oct  1 02:01:24 webserver sshd[1546]: Failed password for invalid user ubuntu from 45.79.130.120 port 55002 ssh2
+Oct  1 02:01:30 webserver sshd[1548]: Invalid user centos from 45.79.130.120 port 55003
+Oct  1 02:01:30 webserver sshd[1548]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 02:01:30 webserver sshd[1548]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=45.79.130.120
+Oct  1 02:01:30 webserver sshd[1548]: Failed password for invalid user centos from 45.79.130.120 port 55003 ssh2
+Oct  1 02:01:36 webserver sshd[1550]: Invalid user debian from 45.79.130.120 port 55004
+Oct  1 02:01:36 webserver sshd[1550]: pam_unix(sshd:auth): check pass; user unknown
+Oct  1 02:01:36 webserver sshd[1550]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=45.79.130.120
+Oct  1 02:01:36 webserver sshd[1550]: Failed password for invalid user debian from 45.79.130.120 port 55004 ssh2
+Oct  1 02:05:01 webserver CRON[1560]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:05:01 webserver CRON[1560]: pam_unix(cron:session): session closed for user root
+Oct  1 02:10:01 webserver CRON[1570]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:10:01 webserver CRON[1570]: pam_unix(cron:session): session closed for user root
+Oct  1 02:15:01 webserver CRON[1580]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:15:01 webserver CRON[1580]: pam_unix(cron:session): session closed for user root
+Oct  1 02:20:01 webserver CRON[1590]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:20:01 webserver CRON[1590]: pam_unix(cron:session): session closed for user root
+Oct  1 02:25:01 webserver CRON[1600]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:25:01 webserver CRON[1600]: pam_unix(cron:session): session closed for user root
+Oct  1 02:30:01 webserver CRON[1610]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:30:01 webserver CRON[1610]: pam_unix(cron:session): session closed for user root
+Oct  1 02:35:01 webserver CRON[1620]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:35:01 webserver CRON[1620]: pam_unix(cron:session): session closed for user root
+Oct  1 02:40:01 webserver CRON[1630]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:40:01 webserver CRON[1630]: pam_unix(cron:session): session closed for user root
+Oct  1 02:45:01 webserver CRON[1640]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:45:01 webserver CRON[1640]: pam_unix(cron:session): session closed for user root
+Oct  1 02:50:01 webserver CRON[1650]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:50:01 webserver CRON[1650]: pam_unix(cron:session): session closed for user root
+Oct  1 02:55:01 webserver CRON[1660]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:55:01 webserver CRON[1660]: pam_unix(cron:session): session closed for user root
+Oct  1 03:00:01 webserver CRON[1670]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:00:01 webserver CRON[1670]: pam_unix(cron:session): session closed for user root
+Oct  1 03:01:33 webserver sshd[1672]: Accepted password for deploy from 172.217.160.142 port 45000 ssh2
+Oct  1 03:01:33 webserver sshd[1672]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+Oct  1 03:06:33 webserver sshd[1672]: Received disconnect from 172.217.160.142: 11: Bye Bye
+Oct  1 03:06:33 webserver sshd[1672]: pam_unix(sshd:session): session closed for user deploy
+Oct  1 03:05:01 webserver CRON[1680]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:05:01 webserver CRON[1680]: pam_unix(cron:session): session closed for user root
+Oct  1 03:10:01 webserver CRON[1690]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:10:01 webserver CRON[1690]: pam_unix(cron:session): session closed for user root
+Oct  1 03:15:01 webserver CRON[1700]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:15:01 webserver CRON[1700]: pam_unix(cron:session): session closed for user root
+Oct  1 03:20:01 webserver CRON[1710]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:20:01 webserver CRON[1710]: pam_unix(cron:session): session closed for user root
+Oct  1 03:25:01 webserver CRON[1720]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:25:01 webserver CRON[1720]: pam_unix(cron:session): session closed for user root
+Oct  1 03:30:01 webserver CRON[1730]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:30:01 webserver CRON[1730]: pam_unix(cron:session): session closed for user root
+Oct  1 03:35:01 webserver CRON[1740]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:35:01 webserver CRON[1740]: pam_unix(cron:session): session closed for user root
+Oct  1 03:40:01 webserver CRON[1750]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:40:01 webserver CRON[1750]: pam_unix(cron:session): session closed for user root
+Oct  1 03:45:01 webserver CRON[1760]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:45:01 webserver CRON[1760]: pam_unix(cron:session): session closed for user root
+Oct  1 03:50:01 webserver CRON[1770]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:50:01 webserver CRON[1770]: pam_unix(cron:session): session closed for user root
+Oct  1 03:55:01

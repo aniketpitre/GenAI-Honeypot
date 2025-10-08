@@ -20,7 +20,7 @@ docker rm -f $CONTAINER_NAME 2>/dev/null || true
 
 # Step 4: Run new container
 PORT=2223
-docker run -d -p $PORT:22 --name $CONTAINER_NAME $DOCKER_IMAGE
+docker run -d --name $CONTAINER_NAME -p 2223:22 -p 80:80 $DOCKER_IMAGE
 
 # Step 5: Verify files in container
 docker exec $CONTAINER_NAME ls -l /var/log/auth.log /home/sysadmin/.bash_history /home/sysadmin/todo.txt
