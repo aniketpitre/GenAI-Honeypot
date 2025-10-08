@@ -7,6 +7,10 @@ if [ -z "$GEMINI_API_KEY" ]; then
   exit 1
 fi
 
+
+# Step 0: Clean previous generated files
+rm -rf generated_files/*
+
 # Step 1: Generate files using Gemini API
 python3 generation_script.py --persona persona_config.json --output generated_files
 

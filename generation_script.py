@@ -18,6 +18,8 @@ def main():
         sys.exit(1)
     genai.configure(api_key=api_key)
 
+    import random
+    import datetime
     with open(args.persona, 'r') as f:
         config = json.load(f)
 
@@ -28,9 +30,11 @@ def main():
 
     model = genai.GenerativeModel('models/gemini-2.0-flash')
 
+    # Add randomness/timestamp to each prompt for uniqueness
+    run_id = f"RunID:{random.randint(100000,999999)} Date:{datetime.datetime.now().isoformat()}"
     for file_obj in files:
         rel_path = file_obj['path']
-        prompt = file_obj['prompt']
+        prompt = file_obj['prompt'] + f"\n{run_id}"
         # Write to /generated_files instead of system locations
         out_path = Path(args.output) / rel_path.lstrip('/')
         gen_root = Path(args.output)
