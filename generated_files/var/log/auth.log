@@ -1,0 +1,216 @@
+```
+Oct  1 00:00:05 webserver systemd: Started Session 1 of user root.
+Oct  1 00:00:05 webserver systemd-logind[482]: New session 1 of user root.
+Oct  1 00:00:05 webserver login[1113]: pam_unix(login:session): session opened for user root by LOGIN(uid=0)
+Oct  1 00:00:05 webserver systemd: pam_unix(systemd-user:session): session opened for user root by (uid=0)
+Oct  1 00:00:05 webserver systemd-logind[482]: Session 1 logged in without seat
+Oct  1 00:00:06 webserver login[1113]: ROOT LOGIN  on '/dev/tty1'
+Oct  1 00:01:02 webserver login[1113]: pam_unix(login:session): session closed for user root
+Oct  1 00:01:02 webserver systemd-logind[482]: Session 1 ended.
+Oct  1 00:01:02 webserver systemd: session-1.scope: Succeeded.
+Oct  1 00:01:02 webserver systemd: Stopped Session 1 of user root.
+Oct  1 00:01:05 webserver systemd: Created slice User Slice of UID 1000.
+Oct  1 00:01:05 webserver systemd: Started User Slice of UID 1000.
+Oct  1 00:01:05 webserver systemd: Starting User Manager for UID 1000...
+Oct  1 00:01:05 webserver systemd: Started Session 2 of user user1.
+Oct  1 00:01:05 webserver systemd-logind[482]: New session 2 of user user1.
+Oct  1 00:01:06 webserver systemd[1205]: pam_unix(systemd-user:session): session opened for user user1 by (uid=0)
+Oct  1 00:01:06 webserver systemd[1205]: Starting D-Bus User Message Bus Socket...
+Oct  1 00:01:06 webserver systemd[1205]: Listening on D-Bus User Message Bus Socket.
+Oct  1 00:01:06 webserver systemd[1205]: Started D-Bus User Message Bus Socket.
+Oct  1 00:01:06 webserver systemd[1205]: Reached target Sockets.
+Oct  1 00:01:06 webserver systemd[1205]: Reached target Basic System.
+Oct  1 00:01:06 webserver systemd[1205]: Reached target Default.
+Oct  1 00:01:06 webserver systemd[1205]: Startup finished in 19ms.
+Oct  1 00:01:06 webserver systemd: Started User Manager for UID 1000.
+Oct  1 00:01:06 webserver systemd: Started Session 2 of user user1.
+Oct  1 00:01:07 webserver systemd-logind[482]: Session 2 logged in without seat
+Oct  1 00:02:01 webserver CRON[1220]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:02:01 webserver CRON[1220]: pam_unix(cron:session): session closed for user root
+Oct  1 00:17:01 webserver CRON[1317]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:17:01 webserver CRON[1317]: pam_unix(cron:session): session closed for user root
+Oct  1 00:32:01 webserver CRON[1411]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:32:01 webserver CRON[1411]: pam_unix(cron:session): session closed for user root
+Oct  1 00:47:01 webserver CRON[1494]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 00:47:01 webserver CRON[1494]: pam_unix(cron:session): session closed for user root
+Oct  1 01:00:01 webserver CRON[1580]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:00:01 webserver CRON[1580]: pam_unix(cron:session): session closed for user root
+Oct  1 01:02:01 webserver CRON[1592]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:02:01 webserver CRON[1592]: pam_unix(cron:session): session closed for user root
+Oct  1 01:17:01 webserver CRON[1676]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:17:01 webserver CRON[1676]: pam_unix(cron:session): session closed for user root
+Oct  1 01:32:01 webserver CRON[1770]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:32:01 webserver CRON[1770]: pam_unix(cron:session): session closed for user root
+Oct  1 01:47:01 webserver CRON[1863]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 01:47:01 webserver CRON[1863]: pam_unix(cron:session): session closed for user root
+Oct  1 02:00:01 webserver CRON[1948]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:00:01 webserver CRON[1948]: pam_unix(cron:session): session closed for user root
+Oct  1 02:02:01 webserver CRON[1960]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:02:01 webserver CRON[1960]: pam_unix(cron:session): session closed for user root
+Oct  1 02:17:01 webserver CRON[2054]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:17:01 webserver CRON[2054]: pam_unix(cron:session): session closed for user root
+Oct  1 02:32:01 webserver CRON[2148]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:32:01 webserver CRON[2148]: pam_unix(cron:session): session closed for user root
+Oct  1 02:47:01 webserver CRON[2241]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 02:47:01 webserver CRON[2241]: pam_unix(cron:session): session closed for user root
+Oct  1 03:00:01 webserver CRON[2326]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:00:01 webserver CRON[2326]: pam_unix(cron:session): session closed for user root
+Oct  1 03:02:01 webserver CRON[2338]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:02:01 webserver CRON[2338]: pam_unix(cron:session): session closed for user root
+Oct  1 03:17:01 webserver CRON[2432]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:17:01 webserver CRON[2432]: pam_unix(cron:session): session closed for user root
+Oct  1 03:32:01 webserver CRON[2526]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:32:01 webserver CRON[2526]: pam_unix(cron:session): session closed for user root
+Oct  1 03:47:01 webserver CRON[2619]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 03:47:01 webserver CRON[2619]: pam_unix(cron:session): session closed for user root
+Oct  1 04:00:01 webserver CRON[2704]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 04:00:01 webserver CRON[2704]: pam_unix(cron:session): session closed for user root
+Oct  1 04:02:01 webserver CRON[2716]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 04:02:01 webserver CRON[2716]: pam_unix(cron:session): session closed for user root
+Oct  1 04:17:01 webserver CRON[2810]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 04:17:01 webserver CRON[2810]: pam_unix(cron:session): session closed for user root
+Oct  1 04:32:01 webserver CRON[2904]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 04:32:01 webserver CRON[2904]: pam_unix(cron:session): session closed for user root
+Oct  1 04:47:01 webserver CRON[2997]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 04:47:01 webserver CRON[2997]: pam_unix(cron:session): session closed for user root
+Oct  1 05:00:01 webserver CRON[3082]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 05:00:01 webserver CRON[3082]: pam_unix(cron:session): session closed for user root
+Oct  1 05:02:01 webserver CRON[3094]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 05:02:01 webserver CRON[3094]: pam_unix(cron:session): session closed for user root
+Oct  1 05:17:01 webserver CRON[3188]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 05:17:01 webserver CRON[3188]: pam_unix(cron:session): session closed for user root
+Oct  1 05:32:01 webserver CRON[3282]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 05:32:01 webserver CRON[3282]: pam_unix(cron:session): session closed for user root
+Oct  1 05:47:01 webserver CRON[3375]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 05:47:01 webserver CRON[3375]: pam_unix(cron:session): session closed for user root
+Oct  1 06:00:01 webserver CRON[3460]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 06:00:01 webserver CRON[3460]: pam_unix(cron:session): session closed for user root
+Oct  1 06:02:01 webserver CRON[3472]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 06:02:01 webserver CRON[3472]: pam_unix(cron:session): session closed for user root
+Oct  1 06:17:01 webserver CRON[3566]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 06:17:01 webserver CRON[3566]: pam_unix(cron:session): session closed for user root
+Oct  1 06:32:01 webserver CRON[3660]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 06:32:01 webserver CRON[3660]: pam_unix(cron:session): session closed for user root
+Oct  1 06:47:01 webserver CRON[3753]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 06:47:01 webserver CRON[3753]: pam_unix(cron:session): session closed for user root
+Oct  1 07:00:01 webserver CRON[3838]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 07:00:01 webserver CRON[3838]: pam_unix(cron:session): session closed for user root
+Oct  1 07:02:01 webserver CRON[3850]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 07:02:01 webserver CRON[3850]: pam_unix(cron:session): session closed for user root
+Oct  1 07:17:01 webserver CRON[3944]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 07:17:01 webserver CRON[3944]: pam_unix(cron:session): session closed for user root
+Oct  1 07:32:01 webserver CRON[4038]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 07:32:01 webserver CRON[4038]: pam_unix(cron:session): session closed for user root
+Oct  1 07:47:01 webserver CRON[4131]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 07:47:01 webserver CRON[4131]: pam_unix(cron:session): session closed for user root
+Oct  1 08:00:01 webserver CRON[4216]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 08:00:01 webserver CRON[4216]: pam_unix(cron:session): session closed for user root
+Oct  1 08:02:01 webserver CRON[4228]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 08:02:01 webserver CRON[4228]: pam_unix(cron:session): session closed for user root
+Oct  1 08:17:01 webserver CRON[4322]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 08:17:01 webserver CRON[4322]: pam_unix(cron:session): session closed for user root
+Oct  1 08:32:01 webserver CRON[4416]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 08:32:01 webserver CRON[4416]: pam_unix(cron:session): session closed for user root
+Oct  1 08:47:01 webserver CRON[4509]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 08:47:01 webserver CRON[4509]: pam_unix(cron:session): session closed for user root
+Oct  1 09:00:01 webserver CRON[4594]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 09:00:01 webserver CRON[4594]: pam_unix(cron:session): session closed for user root
+Oct  1 09:02:01 webserver CRON[4606]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 09:02:01 webserver CRON[4606]: pam_unix(cron:session): session closed for user root
+Oct  1 09:17:01 webserver CRON[4700]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 09:17:01 webserver CRON[4700]: pam_unix(cron:session): session closed for user root
+Oct  1 09:32:01 webserver CRON[4794]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 09:32:01 webserver CRON[4794]: pam_unix(cron:session): session closed for user root
+Oct  1 09:47:01 webserver CRON[4887]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 09:47:01 webserver CRON[4887]: pam_unix(cron:session): session closed for user root
+Oct  1 10:00:01 webserver CRON[4972]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 10:00:01 webserver CRON[4972]: pam_unix(cron:session): session closed for user root
+Oct  1 10:02:01 webserver CRON[4984]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 10:02:01 webserver CRON[4984]: pam_unix(cron:session): session closed for user root
+Oct  1 10:17:01 webserver CRON[5078]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 10:17:01 webserver CRON[5078]: pam_unix(cron:session): session closed for user root
+Oct  1 10:32:01 webserver CRON[5172]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 10:32:01 webserver CRON[5172]: pam_unix(cron:session): session closed for user root
+Oct  1 10:47:01 webserver CRON[5265]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 10:47:01 webserver CRON[5265]: pam_unix(cron:session): session closed for user root
+Oct  1 11:00:01 webserver CRON[5350]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 11:00:01 webserver CRON[5350]: pam_unix(cron:session): session closed for user root
+Oct  1 11:02:01 webserver CRON[5362]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 11:02:01 webserver CRON[5362]: pam_unix(cron:session): session closed for user root
+Oct  1 11:17:01 webserver CRON[5456]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 11:17:01 webserver CRON[5456]: pam_unix(cron:session): session closed for user root
+Oct  1 11:32:01 webserver CRON[5550]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 11:32:01 webserver CRON[5550]: pam_unix(cron:session): session closed for user root
+Oct  1 11:47:01 webserver CRON[5643]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 11:47:01 webserver CRON[5643]: pam_unix(cron:session): session closed for user root
+Oct  1 12:00:01 webserver CRON[5728]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 12:00:01 webserver CRON[5728]: pam_unix(cron:session): session closed for user root
+Oct  1 12:02:01 webserver CRON[5740]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 12:02:01 webserver CRON[5740]: pam_unix(cron:session): session closed for user root
+Oct  1 12:17:01 webserver CRON[5834]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 12:17:01 webserver CRON[5834]: pam_unix(cron:session): session closed for user root
+Oct  1 12:32:01 webserver CRON[5928]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 12:32:01 webserver CRON[5928]: pam_unix(cron:session): session closed for user root
+Oct  1 12:47:01 webserver CRON[6021]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 12:47:01 webserver CRON[6021]: pam_unix(cron:session): session closed for user root
+Oct  1 13:00:01 webserver CRON[6106]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 13:00:01 webserver CRON[6106]: pam_unix(cron:session): session closed for user root
+Oct  1 13:02:01 webserver CRON[6118]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 13:02:01 webserver CRON[6118]: pam_unix(cron:session): session closed for user root
+Oct  1 13:17:01 webserver CRON[6212]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 13:17:01 webserver CRON[6212]: pam_unix(cron:session): session closed for user root
+Oct  1 13:32:01 webserver CRON[6306]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 13:32:01 webserver CRON[6306]: pam_unix(cron:session): session closed for user root
+Oct  1 13:47:01 webserver CRON[6399]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 13:47:01 webserver CRON[6399]: pam_unix(cron:session): session closed for user root
+Oct  1 14:00:01 webserver CRON[6484]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 14:00:01 webserver CRON[6484]: pam_unix(cron:session): session closed for user root
+Oct  1 14:02:01 webserver CRON[6496]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 14:02:01 webserver CRON[6496]: pam_unix(cron:session): session closed for user root
+Oct  1 14:17:01 webserver CRON[6590]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 14:17:01 webserver CRON[6590]: pam_unix(cron:session): session closed for user root
+Oct  1 14:32:01 webserver CRON[6684]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 14:32:01 webserver CRON[6684]: pam_unix(cron:session): session closed for user root
+Oct  1 14:47:01 webserver CRON[6777]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 14:47:01 webserver CRON[6777]: pam_unix(cron:session): session closed for user root
+Oct  1 15:00:01 webserver CRON[6862]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 15:00:01 webserver CRON[6862]: pam_unix(cron:session): session closed for user root
+Oct  1 15:02:01 webserver CRON[6874]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 15:02:01 webserver CRON[6874]: pam_unix(cron:session): session closed for user root
+Oct  1 15:17:01 webserver CRON[6968]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 15:17:01 webserver CRON[6968]: pam_unix(cron:session): session closed for user root
+Oct  1 15:32:01 webserver CRON[7062]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 15:32:01 webserver CRON[7062]: pam_unix(cron:session): session closed for user root
+Oct  1 15:47:01 webserver CRON[7155]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 15:47:01 webserver CRON[7155]: pam_unix(cron:session): session closed for user root
+Oct  1 16:00:01 webserver CRON[7240]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 16:00:01 webserver CRON[7240]: pam_unix(cron:session): session closed for user root
+Oct  1 16:02:01 webserver CRON[7252]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 16:02:01 webserver CRON[7252]: pam_unix(cron:session): session closed for user root
+Oct  1 16:17:01 webserver CRON[7346]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 16:17:01 webserver CRON[7346]: pam_unix(cron:session): session closed for user root
+Oct  1 16:32:01 webserver CRON[7440]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 16:32:01 webserver CRON[7440]: pam_unix(cron:session): session closed for user root
+Oct  1 16:47:01 webserver CRON[7533]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 16:47:01 webserver CRON[7533]: pam_unix(cron:session): session closed for user root
+Oct  1 17:00:01 webserver CRON[7618]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 17:00:01 webserver CRON[7618]: pam_unix(cron:session): session closed for user root
+Oct  1 17:02:01 webserver CRON[7630]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 17:02:01 webserver CRON[7630]: pam_unix(cron:session): session closed for user root
+Oct  1 17:17:01 webserver CRON[7724]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 17:17:01 webserver CRON[7724]: pam_unix(cron:session): session closed for user root
+Oct  1 17:32:01 webserver CRON[7818]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 17:32:01 webserver CRON[7818]: pam_unix(cron:session): session closed for user root
+Oct  1 17:47:01 webserver CRON[7911]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 17:47:01 webserver CRON[7911]: pam_unix(cron:session): session closed for user root
+Oct  1 18:00:01 webserver CRON[7996]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 18:00:01 webserver CRON[7996]: pam_unix(cron:session): session closed for user root
+Oct  1 18:02:01 webserver CRON[8008]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 18:02:01 webserver CRON[8008]: pam_unix(cron:session): session closed for user root
+Oct  1 18:17:01 webserver CRON[8102]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 18:17:01 webserver CRON[8102]: pam_unix(cron:session): session closed for user root
+Oct  1 18:32:01 webserver CRON[8196]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 18:32:01 webserver CRON[8196]: pam_unix(cron:session): session closed for user root
+Oct  1 18:47:01 webserver CRON[8289]: pam_unix(cron:session): session opened for user root by (uid=0)
+Oct  1 18:47:01 webserver CRON[8289]: pam_unix(cron:session): session closed for user root
+Oct  1 19:00:01 webserver CRON[8374]: pam_unix(cron:session): session opened for user root by (uid

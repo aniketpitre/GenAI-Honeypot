@@ -1,8 +1,10 @@
-# GenAI-Honeypot 🕵️‍♂️🧑‍💻🚨
+# GenAI-Honeypot 🕵️‍♂️🧑‍💻🚨 (v1.1)
 
 ## Overview
 
 GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a realistic Linux web server environment. It uses Google Gemini generative AI to create authentic system files, logs, and user activity, making it highly convincing to attackers and penetration testers.
+
+New in v1.1: a full Elastic Stack (Elasticsearch, Logstash, Kibana) setup via docker-compose. The honeypot ships its container logs to Logstash (GELF), gets indexed into Elasticsearch, and visualized in Kibana—with dashboards you can embed directly in your app.
 
 ### Key Features
 
@@ -30,6 +32,11 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 	 Creates `sysadmin` and `root` users with known credentials for testing.  
 	 Exposes SSH (port 2223) and HTTP (port 80) for external access.
 
+3. **Centralized Logging (ELK)**  
+	 Docker Compose launches Elasticsearch, Logstash, Kibana, and the honeypot together.  
+	 Honeypot logs are shipped to Logstash via GELF UDP and indexed into Elasticsearch.  
+	 Kibana provides live dashboards at http://localhost:5601.
+
 3. **Service Startup**  
 	 Nginx and SSHD are started automatically.  
 	 Generated files are copied into the container and permissions set.
@@ -43,7 +50,7 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 
 ---
 
-## How to Run 🏁
+## How to Run 🏁 (v1.1)
 
 1. **Clone the Repository**
 	 ```bash
@@ -51,12 +58,12 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 	 cd GenAI-Honeypot
 	 ```
 
-2. **Set Your Gemini API Key and Build**
+2. **Set Your Gemini API Key and Start the Stack**
 	 ```bash
 	 export GEMINI_API_KEY=your_gemini_api_key
 	 bash build_and_run.sh
 	 ```
-	 This will build the Docker image, generate files, and start the honeypot container.
+	 This generates AI artifacts and starts Elasticsearch (9200), Kibana (5601), Logstash (12201/udp), and the honeypot (2223, 80) via docker-compose.
 
 3. **Access the Honeypot**
 	 - **SSH:**  
@@ -81,13 +88,17 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 		 docker exec honeypot-test cat /home/sysadmin/todo.txt
 		 ```
 
-5. **Test Security and Monitoring**
+5. **View Dashboards (Kibana)**
+	 - Open Kibana: http://localhost:5601
+	 - Create a data view (index pattern) matching `honeypot-*` and build dashboards (e.g., failed SSH attempts, accepted logins, IP distribution).
+
+6. **Test Security and Monitoring**
 	 - Try attacker commands:
 		 ```bash
 		 docker exec honeypot-test cat /etc/shadow
 		 docker exec honeypot-test whoami
 		 ```
-	 - Check logs for suspicious activity.
+	 - Check Kibana Discover and dashboards for incoming events.
 
 ---
 
@@ -99,8 +110,8 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 	Uses Gemini API to create files that evolve over time.
 - **Service Exposure:**  
 	SSH and web server are accessible for real interaction and testing.
-- **Extensible Monitoring:**  
-	Can be enhanced with adaptive response scripts and stealth monitoring.
+- **Centralized Monitoring:**  
+	All container logs flow to ELK; build dashboards in Kibana and embed them.
 
 ---
 
@@ -118,8 +129,19 @@ GenAI-Honeypot is an advanced, AI-powered honeypot system designed to simulate a
 ## Extending the Honeypot 🛠️
 
 - Add more AI-generated files or prompts in `persona_config.json`.
-- Implement adaptive response scripts for stealth monitoring and alerting.
+- Implement adaptive response scripts inside the container or ship simulator logs to Logstash (Beats/GELF).
 - Integrate with SIEM or security dashboards for real-time detection.
+
+---
+
+## Embedding Kibana in Your App (Step 5)
+
+1. In Kibana, open your dashboard and click Share → Embed code → Iframe.
+2. Copy the `<iframe>` snippet.
+3. Paste it into your React app where alerts were listed.
+4. Ensure Kibana is accessible from the browser where your React app runs (CORS/Content Security Policy may apply).
+
+Tip: For production, consider securing Kibana and proxying it through your app domain.
 
 ---
 

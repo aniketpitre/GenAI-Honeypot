@@ -1,32 +1,42 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
+# v1.1 Orchestration Script: Generate AI files and bring up ELK + Honeypot via docker-compose
 
 # Ensure API key is set
-if [ -z "$GEMINI_API_KEY" ]; then
+if [ -z "${GEMINI_API_KEY:-}" ]; then
   echo "Error: GEMINI_API_KEY environment variable not set."
   exit 1
 fi
 
-
-# Step 0: Clean previous generated files
+# Clean up stale files from v1.0 if present
+rm -f nohup.out || true
+mkdir -p generated_files
 rm -rf generated_files/*
 
-# Step 1: Generate files using Gemini API
+# Generate files using Gemini API
+echo "[v1.1] Generating honeypot artifacts via Gemini..."
 python3 generation_script.py --persona persona_config.json --output generated_files
 
-# Step 2: Build Docker image
-DOCKER_IMAGE=genai-honeypot
-docker build -t $DOCKER_IMAGE .
+# Determine docker-compose command (docker compose vs docker-compose)
+DC="docker compose"
+if ! docker compose version >/dev/null 2>&1; then
+  if command -v docker-compose >/dev/null 2>&1; then
+    DC="docker-compose"
+  else
+    echo "Error: docker compose or docker-compose not found. Please install Docker Compose."
+    exit 1
+  fi
+fi
 
-# Step 3: Remove previous container if exists
-CONTAINER_NAME=honeypot-test
-docker rm -f $CONTAINER_NAME 2>/dev/null || true
+# Bring up the full stack
+echo "[v1.1] Starting ELK stack and honeypot..."
+$DC up -d --build
 
-# Step 4: Run new container
-PORT=2223
-docker run -d --name $CONTAINER_NAME -p 2223:22 -p 80:80 $DOCKER_IMAGE
+echo "[v1.1] Stack is up. Services: elasticsearch:9200, kibana:5601, logstash:12201/udp, honeypot:2223,80"
 
-# Step 5: Verify files in container
-docker exec $CONTAINER_NAME ls -l /var/log/auth.log /home/sysadmin/.bash_history /home/sysadmin/todo.txt
+# Quick verification: check files inside the honeypot container
+echo "[v1.1] Verifying files in honeypot container..."
+docker exec honeypot-test ls -l /var/log/auth.log /home/sysadmin/.bash_history /home/sysadmin/todo.txt
 
-echo "Honeypot system is built, running, and verified!"
+echo "[v1.1] Upgrade complete. Access Kibana at http://localhost:5601"
