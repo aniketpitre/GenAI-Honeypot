@@ -1,0 +1,52 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.14.0
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./:/workspace:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+    ports:
+      - "5601:5601"
+
+  genai-honeypot:
+    build: .
+    container_name: honeypot-test
+    depends_on:
+      - logstash
+    ports:
+      - "2223:22"
+      - "80:80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  esdata:
+    driver: local
