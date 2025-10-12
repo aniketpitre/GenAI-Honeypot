@@ -12,6 +12,9 @@ RUN apt-get update && \
     echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
     echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config && \
     echo 'AllowUsers sysadmin root admin' >> /etc/ssh/sshd_config && \
+    echo 'SyslogFacility AUTH' >> /etc/ssh/sshd_config && \
+    echo 'LogLevel VERBOSE' >> /etc/ssh/sshd_config && \
+    echo 'UsePAM yes' >> /etc/ssh/sshd_config && \
     wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb && \
     dpkg -i filebeat-8.14.0-amd64.deb && \
     rm filebeat-8.14.0-amd64.deb

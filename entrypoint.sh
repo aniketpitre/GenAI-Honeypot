@@ -10,10 +10,11 @@ echo "[ENTRYPOINT] Starting honeypot container services..."
 # Create necessary directories
 mkdir -p /var/run/sshd /var/log /home/sysadmin
 
-# Create /var/log/auth.log with proper permissions for SSH logging
+# Create /var/log/auth.log with proper permissions for syslog/SSH logging
 touch /var/log/auth.log
-chmod 644 /var/log/auth.log
-chown root:root /var/log/auth.log
+# rsyslog runs as user 'syslog' and group 'adm' on Ubuntu; grant write to owner only
+chown syslog:adm /var/log/auth.log
+chmod 640 /var/log/auth.log
 
 # Fix Filebeat config permissions
 chmod 600 /etc/filebeat/filebeat.yml
@@ -56,4 +57,4 @@ trap cleanup SIGTERM SIGINT
 
 # Start SSH daemon in foreground (main process)
 echo "[ENTRYPOINT] Starting SSH daemon in foreground..."
-exec /usr/sbin/sshd -D -e
+exec /usr/sbin/sshd -D
