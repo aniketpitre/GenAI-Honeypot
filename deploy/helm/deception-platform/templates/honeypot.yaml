@@ -29,6 +29,9 @@ spec:
     spec:
       automountServiceAccountToken: false   # a compromised pod must not get cluster credentials
       enableServiceLinks: false
+      {{- with .Values.honeypot.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
       {{- include "dp.pullSecrets" . | nindent 6 }}
       {{- with .Values.honeypot.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}

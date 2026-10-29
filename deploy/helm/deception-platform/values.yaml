@@ -24,6 +24,17 @@ secrets:
   databaseUrl: ""         # postgresql+psycopg://user:pass@host:5432/db (ignored when dev.postgres.enabled)
   geminiApiKey: ""
   webhookUrl: ""
+  elasticsearchUser: ""
+  elasticsearchPassword: ""
+  elasticsearchApiKey: ""   # alternative to user/password (base64 "id:key")
+
+# Sync the Secret from Vault / AWS SM / GCP SM / ... with External Secrets Operator
+# instead of putting values in Helm. Keys are the Secret keys listed above.
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef: {name: "", kind: ClusterSecretStore}
+  remoteRefs: {}          # e.g. {ADMIN_TOKEN: deception/admin-token, INTERNAL_API_KEY: deception/internal-key, DATABASE_URL: deception/database-url}
 
 # Public URL canary tokens point at (the canary ingress host, with scheme).
 canary:
@@ -37,6 +48,7 @@ logstash:
 # --- workloads ------------------------------------------------------------------
 api:
   replicas: 2
+  trustedProxyCount: 2    # ingress + UI nginx append X-Forwarded-For (admin login-failure limiting)
   resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {memory: 256Mi}}
 listener:
   replicas: 2
@@ -57,6 +69,7 @@ honeypot:
     httpPort: 80
     annotations: {}
   resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {memory: 256Mi}}
+  runtimeClassName: ""   # e.g. gvisor / kata for stronger isolation of the bait pod
   nodeSelector: {}
   tolerations: []
 
@@ -82,4 +95,6 @@ monitoring:
 # --- dev/demo dependencies (NOT for production) ------------------------------------
 dev:
   postgres: {enabled: false}
-  elk: {enabled: false}   # single-node Elasticsearch + Logstash + Kibana + setup job
+  elk:                    # single-node Elasticsearch + Logstash + Kibana + setup job (security on)
+    enabled: false
+    password: ""          # required when enabled: used for the elastic, writer and kibana_system accounts

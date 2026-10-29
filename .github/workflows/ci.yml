@@ -23,7 +23,9 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12", cache: pip}
       - run: |
-          pip install -r services/api/requirements.txt -r services/canary-listener/requirements.txt -r services/generator/requirements.txt
+          pip install -r services/api/requirements.txt
+          pip install -r services/canary-listener/requirements.txt
+          pip install -r services/generator/requirements.txt
       - run: python tests/e2e/run_e2e.py
 
   ui:
@@ -48,11 +50,12 @@ jobs:
       - uses: azure/setup-helm@v4
       - name: helm lint + schema-validate
         run: |
-          ARGS="--set secrets.adminToken=a,secrets.internalApiKey=b,dev.postgres.enabled=true,dev.elk.enabled=true,monitoring.prometheusRule.enabled=true,monitoring.grafanaDashboard.enabled=true"
+          ARGS="--set secrets.adminToken=a,secrets.internalApiKey=b,dev.postgres.enabled=true,dev.elk.enabled=true,dev.elk.password=ci-pass,monitoring.prometheusRule.enabled=true,monitoring.grafanaDashboard.enabled=true"
           helm lint deploy/helm/deception-platform $ARGS
           helm template t deploy/helm/deception-platform $ARGS > /tmp/render.yaml
+          helm template t deploy/helm/deception-platform -f deploy/helm/deception-platform/values.production.yaml > /tmp/render-prod.yaml
           curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
-          ./kubeconform -strict -ignore-missing-schemas -summary -kubernetes-version 1.30.0 /tmp/render.yaml
+          ./kubeconform -strict -ignore-missing-schemas -summary -kubernetes-version 1.30.0 /tmp/render.yaml /tmp/render-prod.yaml
 
   images:
     runs-on: ubuntu-latest

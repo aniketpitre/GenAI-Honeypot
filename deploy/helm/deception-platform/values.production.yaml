@@ -1,0 +1,46 @@
+# Example production overrides:  helm upgrade --install dp deploy/helm/deception-platform -f values.production.yaml
+image:
+  registry: ghcr.io/your-org
+  tag: v0.1.0               # pin a release tag (never :latest)
+  pullSecrets: []
+
+# Secrets come from your secret manager through External Secrets Operator.
+externalSecrets:
+  enabled: true
+  secretStoreRef: {name: vault-backend, kind: ClusterSecretStore}
+  remoteRefs:
+    ADMIN_TOKEN: deception/admin-token
+    INTERNAL_API_KEY: deception/internal-api-key
+    DATABASE_URL: deception/database-url            # managed Postgres, sslmode=require
+    ELASTICSEARCH_USER: deception/es-user
+    ELASTICSEARCH_PASSWORD: deception/es-password
+    WEBHOOK_URL: deception/slack-webhook
+    GEMINI_API_KEY: deception/gemini-api-key
+
+canary: {baseUrl: https://files.example.com}
+elasticsearch: {url: https://es.example.com:9200}   # managed Elastic/OpenSearch with TLS + auth
+logstash: {host: logstash.logging.svc:5044}
+
+ingress:
+  className: nginx
+  dashboardHost: dashboard.example.com
+  canaryHost: files.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Dashboard only: restrict to your office/VPN ranges (the canary host must stay public).
+    # Use a second Ingress or your controller's per-host allow-list for this.
+  tls: {enabled: true}
+
+api: {replicas: 2, trustedProxyCount: 2}
+listener: {trustedProxyCount: 1, autoscaling: {enabled: true, minReplicas: 2, maxReplicas: 10, targetCPUUtilizationPercentage: 70}}
+
+honeypot:
+  enabled: true
+  runtimeClassName: gvisor          # needs a gVisor/Kata RuntimeClass on the node pool
+  nodeSelector: {pool: honeypot}    # dedicated, isolated nodes
+  tolerations: [{key: honeypot, operator: Exists, effect: NoSchedule}]
+
+networkPolicy: {enabled: true}
+monitoring:
+  prometheusRule: {enabled: true}
+  grafanaDashboard: {enabled: true}

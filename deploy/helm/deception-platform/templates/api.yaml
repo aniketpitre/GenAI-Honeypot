@@ -19,12 +19,14 @@ spec:
       automountServiceAccountToken: false
       {{- include "dp.pullSecrets" . | nindent 6 }}
       {{- include "dp.podSecurity" (dict) | nindent 6 }}
+      {{- include "dp.affinity" $sel | nindent 6 }}
       containers:
         - name: api
           image: {{ include "dp.image" (dict "root" . "name" "api") }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports: [{name: http, containerPort: 8080}]
           env:
+            - {name: TRUSTED_PROXY_COUNT, value: {{ .Values.api.trustedProxyCount | quote }}}
             - {name: CANARY_BASE_URL, value: {{ .Values.canary.baseUrl | quote }}}
             - {name: ELASTICSEARCH_URL, value: {{ .Values.elasticsearch.url | default (ternary (printf "http://%s-elasticsearch:9200" (include "dp.fullname" .)) "" .Values.dev.elk.enabled) | quote }}}
           envFrom:

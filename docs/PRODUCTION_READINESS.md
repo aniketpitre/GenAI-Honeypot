@@ -19,14 +19,14 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 | No service-account token mounted in honeypot pod | ✅ |
 | Listener: IP spoof-resistant XFF handling, per-IP rate limit, sensitive headers stripped, uniform responses | ✅ |
 | Replace single shared admin token with real SSO/OIDC + per-user audit trail | ⬜ |
-| Elasticsearch/Kibana: enable `xpack.security`, TLS, per-service credentials (currently disabled for dev) | ⬜ **required before production** |
-| Secrets via External Secrets / Sealed Secrets / Vault (chart supports `secrets.existingSecret`) | 🟡 |
-| Stronger honeypot isolation: gVisor/Kata `runtimeClass`, dedicated node pool/VPC, egress firewall | ⬜ |
-| Image scanning (Trivy/Grype) + SBOM + signing (cosign) in CI; pin base images by digest | ⬜ |
+| Elasticsearch security on in compose and the chart's dev ELK; least-privilege `deception_writer` for API/Logstash; `kibana_system` service account; API supports basic auth/API key + custom CA | ✅ (bootstrap in `pipeline/setup.sh` not run against a live cluster). ⬜ In-cluster TLS between Filebeat/Logstash/ES — use managed ES with TLS for production |
+| Secrets via External Secrets Operator (`externalSecrets.*`) or `existingSecret`; production values example | ✅ |
+| Honeypot `runtimeClassName`, nodeSelector/tolerations for a dedicated pool | ✅ (chart). ⬜ Provision the pool/VPC + cloud egress firewall (yours to do) |
+| Trivy image scan (fails on CRITICAL), Trivy config scan, pip-audit, npm audit (`security.yml`); SBOM + provenance + keyless cosign on release | ✅ (workflows not yet run on GitHub). ⬜ Pin base images by digest (Dependabot can then bump them); enforce signatures at admission |
 | Dependabot for pip/npm/docker/actions | ✅ |
-| Hash-pinned lockfiles for Python (pip-tools/uv) | ⬜ |
+| Hash-pinned lockfile for the API (`requirements.in` → pip-compile → `requirements.txt`, installed with `--require-hashes`) | ✅ API only. ⬜ canary-listener and generator are pinned but not hash-locked yet (`pip-compile --generate-hashes`, then add `--require-hashes` to their Dockerfiles) |
 | Admin/internal secrets must be ≥ 24 chars (API refuses to start otherwise) | ✅ |
-| Login rate limiting / lockout on the admin API (needs trustworthy client IPs behind ingress+UI proxy) | ⬜ |
+| Admin login lock-out per client IP (10 fails / 5 min, 429), IP taken from `X-Forwarded-For` per `trustedProxyCount` | ✅ |
 
 ## 3. Reliability & scale
 - ✅ Health/readiness probes, PDBs, HPA on the listener (stateless), `Recreate` single-replica honeypot.
@@ -56,6 +56,9 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 - 🟡 Browser smoke script `tests/e2e/ui_smoke.cjs` (manual; not in CI yet) caught a real UI bug (alert cards invisible). ⬜ Run it in CI; typed API client generated from the OpenAPI schema.
 - ⬜ Helm chart publishing (OCI) and a `values.production.yaml` example; Argo CD/Flux manifests.
 - ⬜ Test the Logstash grok patterns with `logstash -t` / pipeline unit tests; confirm the Kibana saved-objects import on a real 8.14 instance (**unverified**).
+
+## 6b. Docs
+- ✅ `docs/DEPLOYMENT.md` (production install + verification checklist), `docs/RUNBOOK.md` (rotation, upgrades, backups, alert playbooks).
 
 ## 7. Suggested order of work
 1. **Before any internet exposure:** enable Elasticsearch security + TLS; real secret management; restrict dashboard ingress (VPN/IP allow-list); run the honeypot in its own isolated cluster/namespace with egress firewall.

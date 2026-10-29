@@ -34,6 +34,9 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?set INTERNAL_API_KEY in .env}
       CANARY_BASE_URL: ${CANARY_BASE_URL:-http://localhost:8081}
       ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-}
+      ELASTICSEARCH_USER: ${ELASTICSEARCH_URL:+deception_writer}
+      ELASTICSEARCH_PASSWORD: ${ES_WRITER_PASSWORD:-}
+      TRUSTED_PROXY_COUNT: "1"   # UI nginx sets X-Forwarded-For (login-failure limiting)
       WEBHOOK_URL: ${WEBHOOK_URL:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
@@ -112,12 +115,13 @@ services:
     restart: unless-stopped
     environment:
       discovery.type: single-node
-      xpack.security.enabled: "false"   # dev only - enable + set credentials for production
+      xpack.security.enabled: "true"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
       ES_JAVA_OPTS: -Xms512m -Xmx512m
     ports: ["127.0.0.1:9200:9200"]
     volumes: [esdata:/usr/share/elasticsearch/data]
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fs -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health || exit 1"]
       interval: 15s
       retries: 10
     mem_limit: 1g
@@ -128,6 +132,8 @@ services:
     restart: unless-stopped
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD:-}
     ports: ["127.0.0.1:5601:5601"]
     depends_on:
       elasticsearch: {condition: service_healthy}
@@ -137,6 +143,10 @@ services:
     profiles: [elk]
     image: curlimages/curl:8.10.1
     entrypoint: ["sh", "/pipeline/setup.sh"]
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      ES_WRITER_PASSWORD: ${ES_WRITER_PASSWORD:-}
+      KIBANA_PASSWORD: ${KIBANA_PASSWORD:-}
     volumes: ["./pipeline:/pipeline:ro"]
     depends_on:
       elasticsearch: {condition: service_healthy}
@@ -148,6 +158,9 @@ services:
     restart: unless-stopped
     environment:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USER: deception_writer
+      ELASTICSEARCH_PASSWORD: ${ES_WRITER_PASSWORD:-}
     volumes: ["./pipeline/logstash/pipeline:/usr/share/logstash/pipeline:ro"]
     depends_on:
       elk-setup: {condition: service_completed_successfully}

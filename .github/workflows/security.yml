@@ -1,0 +1,59 @@
+name: Security
+on:
+  push: {branches: [main]}
+  pull_request:
+  schedule: [{cron: "17 4 * * 1"}]
+
+permissions: {contents: read, security-events: write}
+
+jobs:
+  python-audit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: {service: [api, canary-listener, generator]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pip-audit && pip-audit -r services/${{ matrix.service }}/requirements.txt
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm ci && npm audit --omit=dev --audit-level=high
+        working-directory: services/ui
+
+  trivy-config:
+    # Misconfiguration scan of Dockerfiles, compose and the Helm chart.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "0"        # report-only until the honeypot's intentional findings are suppressed
+          format: sarif
+          output: trivy-config.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with: {sarif_file: trivy-config.sarif}
+
+  trivy-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: {service: [api, canary-listener, generator, ui]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@v6
+        with: {context: "services/${{ matrix.service }}", load: true, tags: "scan/${{ matrix.service }}:ci"}
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: scan/${{ matrix.service }}:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
