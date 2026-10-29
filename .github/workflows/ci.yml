@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix: {service: [api, canary-listener, generator]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12", cache: pip}
       - run: pip install -r services/${{ matrix.service }}/requirements-dev.txt
@@ -19,7 +19,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12", cache: pip}
       - run: |
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install httpx paramiko
@@ -63,7 +63,7 @@ jobs:
   ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: {node-version: 22, cache: npm, cache-dependency-path: services/ui/package-lock.json}
       - run: npm ci && npm run build
@@ -72,7 +72,7 @@ jobs:
   deploy-config:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: compose config is valid
         run: |
           cp .env.example .env && sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci/;s/^ADMIN_TOKEN=.*/ADMIN_TOKEN=ci/;s/^INTERNAL_API_KEY=.*/INTERNAL_API_KEY=ci/' .env
@@ -96,6 +96,6 @@ jobs:
     strategy:
       matrix: {service: [api, canary-listener, generator, honeypot, ui]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/build-push-action@v6
         with: {context: "services/${{ matrix.service }}", push: false}
