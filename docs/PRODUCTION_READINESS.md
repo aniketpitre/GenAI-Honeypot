@@ -23,19 +23,21 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 | Secrets via External Secrets / Sealed Secrets / Vault (chart supports `secrets.existingSecret`) | 🟡 |
 | Stronger honeypot isolation: gVisor/Kata `runtimeClass`, dedicated node pool/VPC, egress firewall | ⬜ |
 | Image scanning (Trivy/Grype) + SBOM + signing (cosign) in CI; pin base images by digest | ⬜ |
-| Dependency pinning with lockfiles for Python (pip-tools/uv) and Dependabot/Renovate | ⬜ |
-| Login rate limiting / lockout on the admin API | ⬜ |
+| Dependabot for pip/npm/docker/actions | ✅ |
+| Hash-pinned lockfiles for Python (pip-tools/uv) | ⬜ |
+| Admin/internal secrets must be ≥ 24 chars (API refuses to start otherwise) | ✅ |
+| Login rate limiting / lockout on the admin API (needs trustworthy client IPs behind ingress+UI proxy) | ⬜ |
 
 ## 3. Reliability & scale
 - ✅ Health/readiness probes, PDBs, HPA on the listener (stateless), `Recreate` single-replica honeypot.
 - ✅ Listener forwards with retry and never blocks the response on the API.
-- 🟡 Alerts can be lost if the API is down for >2 retries. ⬜ Add a durable queue (Redis stream / NATS / Kafka) between listener and API, or an on-disk spool.
-- ⬜ Alembic migrations (tables are currently `create_all` on start-up).
+- ✅ Listener spools hits to disk when the API is down (or refuses its key) and retries every 5 s, in order; the API de-duplicates redeliveries via `hit_id`. Covered by `tests/e2e`. 🟡 The spool lives in the pod's `emptyDir`: it survives container restarts but not pod rescheduling — use a PVC or a broker (Redis/NATS) for stronger guarantees.
+- ✅ Alembic migrations run at API start-up under a Postgres advisory lock (safe with several replicas).
 - ⬜ Postgres HA/backups (use a managed DB); Elasticsearch multi-node or managed Elastic/OpenSearch; snapshots.
 - ⬜ Multiple honeypot personas/replicas (web, DB, FTP) as separate Deployments via values.
 
 ## 4. Observability
-- ⬜ Prometheus metrics (`/metrics`): hits/s, forward failures, alert latency, token counts; Grafana dashboards; alert on "listener→API failures".
+- ✅ Prometheus `/metrics` on API and listener (`deception_hits_total`, `canary_hits_total{outcome}`, `canary_spool_size`, event publish failures) with scrape annotations in the chart. ⬜ Grafana dashboard + alert rules (e.g. `canary_spool_size > 0` for 5 m).
 - ⬜ Structured JSON application logs with request IDs; OpenTelemetry traces.
 - ⬜ Self-monitoring canary: a synthetic token hit on a schedule to prove the whole path works end-to-end.
 
@@ -50,7 +52,7 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 
 ## 6. Delivery
 - ✅ CI: unit tests (3 Python services), UI typecheck+build, compose/Helm lint + kubeconform schema check, image builds, chart/pipeline drift check; tag-triggered image publish to GHCR.
-- ⬜ Integration test in CI: `docker compose up` + scripted canary hit → assert alert (and a kind-cluster install of the chart).
+- ✅ `tests/e2e/run_e2e.py` (CI job `e2e`): real processes, generator breadcrumb → trap hit → alert, plus API-outage spool recovery. ⬜ Same flow against `docker compose up`, and a kind-cluster install of the chart.
 - ⬜ Playwright smoke test for the dashboard; typed API client generated from the OpenAPI schema.
 - ⬜ Helm chart publishing (OCI) and a `values.production.yaml` example; Argo CD/Flux manifests.
 - ⬜ Test the Logstash grok patterns with `logstash -t` / pipeline unit tests; confirm the Kibana saved-objects import on a real 8.14 instance (**unverified**).

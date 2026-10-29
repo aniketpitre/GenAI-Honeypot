@@ -55,6 +55,7 @@ class AlertUpdate(BaseModel):
 
 
 class HitIn(BaseModel):
+    hit_id: str | None = Field(default=None, max_length=64)
     token_id: str = Field(max_length=64)
     ip: str = Field(max_length=64)
     user_agent: str = Field(default="", max_length=2000)
