@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix: {service: [api, canary-listener, generator]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install pip-audit && pip-audit -r services/${{ matrix.service }}/requirements.txt
@@ -20,7 +20,7 @@ jobs:
   npm-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: {node-version: 22}
       - run: npm ci && npm audit --omit=dev --audit-level=high
@@ -30,7 +30,7 @@ jobs:
     # Misconfiguration scan of Dockerfiles, compose and the Helm chart.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix: {service: [api, canary-listener, generator, ui]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/build-push-action@v6
         with: {context: "services/${{ matrix.service }}", load: true, tags: "scan/${{ matrix.service }}:ci"}
       - uses: aquasecurity/trivy-action@0.28.0
