@@ -28,6 +28,38 @@ jobs:
           pip install -r services/generator/requirements.txt
       - run: python tests/e2e/run_e2e.py
 
+  compose-smoke:
+    # Real containers: core + honeypot + ELK (official Elastic images), then tests/e2e/compose_smoke.py.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install httpx paramiko
+      - name: configure stack
+        run: |
+          cp .env.example .env
+          for v in POSTGRES_PASSWORD ADMIN_TOKEN INTERNAL_API_KEY ELASTIC_PASSWORD ES_WRITER_PASSWORD KIBANA_PASSWORD; do
+            sed -i "s|^$v=.*|$v=$(openssl rand -hex 24)|" .env
+          done
+          sed -i 's|^ELASTICSEARCH_URL=.*|ELASTICSEARCH_URL=http://elasticsearch:9200|' .env
+      - name: build and start
+        run: docker compose --profile honeypot --profile elk up -d --build
+      - name: wait for ELK bootstrap
+        run: |
+          for i in $(seq 1 120); do
+            state=$(docker inspect -f '{{.State.Status}}/{{.State.ExitCode}}' deception-elk-setup-1 2>/dev/null || true)
+            [ "$state" = "exited/0" ] && break
+            sleep 5
+          done
+          echo "elk-setup: $state"; [ "$state" = "exited/0" ]
+      - name: smoke test
+        run: python tests/e2e/compose_smoke.py --env-file .env
+      - name: logs on failure
+        if: failure()
+        run: docker compose --profile honeypot --profile elk logs --no-color --tail=200
+
   ui:
     runs-on: ubuntu-latest
     steps:
