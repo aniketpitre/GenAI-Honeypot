@@ -1,0 +1,80 @@
+# --- images -------------------------------------------------------------------
+image:
+  registry: ""            # e.g. ghcr.io/your-org
+  tag: ""                 # defaults to Chart.appVersion
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  repositories:
+    api: deception-api
+    listener: deception-canary-listener
+    ui: deception-ui
+    honeypot: deception-honeypot
+    generator: deception-generator
+  filebeat: docker.elastic.co/beats/filebeat:8.14.0
+
+# --- secrets ------------------------------------------------------------------
+# Production: create a Secret yourself (External Secrets / Sealed Secrets / Vault)
+# with keys ADMIN_TOKEN, INTERNAL_API_KEY, DATABASE_URL and optionally
+# GEMINI_API_KEY, WEBHOOK_URL, and set existingSecret. For quick starts, fill the
+# values below and the chart will create the Secret.
+secrets:
+  existingSecret: ""
+  adminToken: ""
+  internalApiKey: ""
+  databaseUrl: ""         # postgresql+psycopg://user:pass@host:5432/db (ignored when dev.postgres.enabled)
+  geminiApiKey: ""
+  webhookUrl: ""
+
+# Public URL canary tokens point at (the canary ingress host, with scheme).
+canary:
+  baseUrl: https://files.example.com
+
+elasticsearch:
+  url: ""                 # e.g. https://es.example:9200 ; empty disables direct event writes
+logstash:
+  host: ""                # e.g. logstash.logging.svc:5044 ; empty disables the filebeat sidecar
+
+# --- workloads ------------------------------------------------------------------
+api:
+  replicas: 2
+  resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {memory: 256Mi}}
+listener:
+  replicas: 2
+  trustedProxyCount: 1    # proxies in front (ingress controller) that append X-Forwarded-For
+  rateLimitPerMinute: 60
+  resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {memory: 128Mi}}
+  autoscaling: {enabled: true, minReplicas: 2, maxReplicas: 10, targetCPUUtilizationPercentage: 70}
+ui:
+  replicas: 2
+  resources: {requests: {cpu: 20m, memory: 32Mi}, limits: {memory: 64Mi}}
+
+honeypot:
+  enabled: true
+  users: "sysadmin:sysadmin,root:toor"   # intentionally weak bait credentials
+  service:
+    type: LoadBalancer
+    sshPort: 22
+    httpPort: 80
+    annotations: {}
+  resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {memory: 256Mi}}
+  nodeSelector: {}
+  tolerations: []
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  dashboardHost: dashboard.example.com
+  canaryHost: files.example.com
+  tls:
+    enabled: true
+    dashboardSecret: dashboard-tls
+    canarySecret: canary-tls
+
+networkPolicy:
+  enabled: true
+
+# --- dev/demo dependencies (NOT for production) ------------------------------------
+dev:
+  postgres: {enabled: false}
+  elk: {enabled: false}   # single-node Elasticsearch + Logstash + Kibana + setup job

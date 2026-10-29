@@ -1,0 +1,29 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dp.fullname" . }}
+  labels: {{- include "dp.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts: [{{ .Values.ingress.dashboardHost }}]
+      secretName: {{ .Values.ingress.tls.dashboardSecret }}
+    - hosts: [{{ .Values.ingress.canaryHost }}]
+      secretName: {{ .Values.ingress.tls.canarySecret }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.dashboardHost }}
+      http:
+        paths:
+          - {path: /, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-ui, port: {name: http}}}}
+    - host: {{ .Values.ingress.canaryHost }}
+      http:
+        paths:
+          - {path: /t/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
+          - {path: /p/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
+{{- end }}

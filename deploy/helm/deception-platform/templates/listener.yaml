@@ -1,0 +1,70 @@
+{{- $sel := dict "root" . "component" "listener" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dp.fullname" . }}-listener
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.listener.autoscaling.enabled }}
+  replicas: {{ .Values.listener.replicas }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" $sel | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- include "dp.pullSecrets" . | nindent 6 }}
+      {{- include "dp.podSecurity" (dict) | nindent 6 }}
+      containers:
+        - name: listener
+          image: {{ include "dp.image" (dict "root" . "name" "listener") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports: [{name: http, containerPort: 8081}]
+          env:
+            - {name: API_URL, value: {{ printf "http://%s-api:8080" (include "dp.fullname" .) | quote }}}
+            - {name: TRUSTED_PROXY_COUNT, value: {{ .Values.listener.trustedProxyCount | quote }}}
+            - {name: RATE_LIMIT_PER_MINUTE, value: {{ .Values.listener.rateLimitPerMinute | quote }}}
+            - name: INTERNAL_API_KEY
+              valueFrom: {secretKeyRef: {name: {{ include "dp.secretName" . }}, key: INTERNAL_API_KEY}}
+          readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 20}
+          resources: {{- toYaml .Values.listener.resources | nindent 12 }}
+          {{- include "dp.containerSecurity" . | nindent 10 }}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dp.fullname" . }}-listener
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "dp.selector" $sel | nindent 4 }}
+  ports: [{name: http, port: 8081, targetPort: http}]
+{{- if .Values.listener.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "dp.fullname" . }}-listener
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: {{ include "dp.fullname" . }}-listener}
+  minReplicas: {{ .Values.listener.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.listener.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: {{ .Values.listener.autoscaling.targetCPUUtilizationPercentage }}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "dp.fullname" . }}-listener
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+{{- end }}

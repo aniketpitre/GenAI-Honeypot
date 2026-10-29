@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { HoneyToken, TokenStatus } from '../types';
+import { HoneyToken, TOKEN_TYPE_LABELS } from '../types';
+import { api } from '../services/api';
 import { ICONS } from '../constants';
 
 interface TokenManagerProps {
@@ -13,8 +14,17 @@ const TokenManager: React.FC<TokenManagerProps> = ({ tokens, onUpdateToken, onDe
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const handleStatusToggle = (token: HoneyToken) => {
-    const newStatus = token.status === TokenStatus.Active ? TokenStatus.Disabled : TokenStatus.Active;
+    const newStatus = token.status === 'active' ? 'disabled' : 'active';
     onUpdateToken({ ...token, status: newStatus });
+  };
+
+  const handleDownload = async (token: HoneyToken) => {
+    const url = URL.createObjectURL(await api.downloadToken(token.id));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${token.name.replace(/[^\w.-]+/g, '_')}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleCopy = (token: HoneyToken) => {
@@ -45,7 +55,8 @@ const TokenManager: React.FC<TokenManagerProps> = ({ tokens, onUpdateToken, onDe
               <tr key={token.id} className="border-t border-sentinel-steel/30 hover:bg-sentinel-steel/10">
                 <td className="p-4">
                   <div className="font-semibold">{token.name}</div>
-                  <div className="text-xs text-sentinel-silver">{token.type}</div>
+                  <div className="text-xs text-sentinel-silver">{TOKEN_TYPE_LABELS[token.type]}</div>
+                  {token.decoy_url && <div className="text-xs text-sentinel-steel font-mono truncate max-w-xs" title={token.decoy_url}>{token.decoy_url}</div>}
                 </td>
                 <td className="p-4 text-sentinel-silver hidden md:table-cell">
                    <div className="flex items-center space-x-2">
@@ -65,19 +76,21 @@ const TokenManager: React.FC<TokenManagerProps> = ({ tokens, onUpdateToken, onDe
                    </div>
                 </td>
                 <td className="p-4 text-center">
-                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${token.alertCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-                        {token.alertCount}
+                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${token.alert_count > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                        {token.alert_count}
                     </span>
                 </td>
                 <td className="p-4">
                   <button onClick={() => handleStatusToggle(token)} className="flex items-center space-x-2">
-                    <div className={`w-4 h-4 rounded-full ${token.status === TokenStatus.Active ? 'bg-sentinel-cyan' : 'bg-sentinel-silver'}`}></div>
+                    <div className={`w-4 h-4 rounded-full ${token.status === 'active' ? 'bg-sentinel-cyan' : 'bg-sentinel-silver'}`}></div>
                     <span>{token.status}</span>
                   </button>
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end space-x-2">
-                    <button className="p-2 hover:bg-sentinel-steel rounded-full">{ICONS.edit}</button>
+                    {token.type === 'document' && (
+                      <button onClick={() => handleDownload(token)} className="px-2 py-1 text-xs font-semibold hover:bg-sentinel-steel rounded-md">Download .docx</button>
+                    )}
                     <button onClick={() => onDeleteToken(token.id)} className="p-2 hover:bg-sentinel-steel rounded-full text-sentinel-red">{ICONS.trash}</button>
                   </div>
                 </td>

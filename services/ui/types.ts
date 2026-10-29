@@ -1,41 +1,39 @@
+export type TokenType = 'url' | 'pixel' | 'document';
+export type TokenStatus = 'active' | 'disabled';
+export type AlertStatus = 'New' | 'Investigating' | 'False Positive' | 'Resolved';
 
-export enum TokenType {
-  URL = 'Fake URL',
-  File = 'Fake File',
-}
-
-export enum TokenStatus {
-  Active = 'Active',
-  Disabled = 'Disabled',
-}
+export const TOKEN_TYPE_LABELS: Record<TokenType, string> = {
+  url: 'Fake URL',
+  pixel: 'Tracking Pixel',
+  document: 'Word Document',
+};
 
 export interface HoneyToken {
   id: string;
   name: string;
   type: TokenType;
-  value: string; // The honey URL or file pixel URL
-  displayUrl?: string; // The deceptive URL for display purposes
-  createdAt: string;
-  alertCount: number;
   status: TokenStatus;
+  value: string; // URL that fires the canary
+  decoy_url: string | null; // deceptive URL shown to the person planting the token
+  created_at: string;
+  alert_count: number;
 }
 
 export interface Alert {
-  id: string;
-  tokenId: string;
-  tokenName: string;
+  id: number;
+  token_id: string;
+  token_name: string;
   timestamp: string;
   ip: string;
-  geolocation: {
-    city: string;
-    country: string;
-    lat: number;
-    lon: number;
-  };
-  userAgent: string;
-  requestHeaders: Record<string, string>;
+  city: string;
+  country: string;
+  lat: number;
+  lon: number;
+  user_agent: string;
+  request_path: string;
+  request_headers: Record<string, string>;
   notes: string;
-  status: 'New' | 'Investigating' | 'False Positive' | 'Resolved';
+  status: AlertStatus;
 }
 
 export type View = 'dashboard' | 'tokens';

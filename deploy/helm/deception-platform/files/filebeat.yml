@@ -1,0 +1,16 @@
+# Sidecar log shipper: tails the honeypot's log volume and forwards to Logstash.
+filebeat.inputs:
+  - type: filestream
+    id: honeypot-auth
+    paths: [/var/log/honeypot/auth.log]
+    fields: {log_type: auth}
+  - type: filestream
+    id: honeypot-nginx
+    paths: [/var/log/honeypot/nginx-access.log]
+    fields: {log_type: nginx_access}
+
+output.logstash:
+  hosts: ["${LOGSTASH_HOST:logstash:5044}"]
+
+logging.level: info
+logging.to_stderr: true

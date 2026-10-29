@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Alert } from '../types';
+import { Alert, AlertStatus } from '../types';
 import { ICONS } from '../constants';
 import Modal from './common/Modal';
 
@@ -21,7 +21,7 @@ const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({ isOpen, onClo
   };
   
   const StatusButton: React.FC<{
-      incidentStatus: 'New' | 'Investigating' | 'False Positive' | 'Resolved';
+      incidentStatus: AlertStatus;
       label: string;
       color: string;
     }> = ({ incidentStatus, label, color }) => (
@@ -42,15 +42,15 @@ const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({ isOpen, onClo
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-semibold text-sentinel-light mb-2">Geolocation</h3>
-            <div className="aspect-video bg-sentinel-blue rounded-lg overflow-hidden border border-sentinel-steel">
-              <iframe
+            <div className="aspect-video bg-sentinel-blue rounded-lg overflow-hidden border border-sentinel-steel flex items-center justify-center text-sentinel-silver text-sm">
+              {!(alert.lat || alert.lon) ? 'Location unknown (private IP or no GeoIP database)' : <iframe
                 width="100%"
                 height="100%"
                 loading="lazy"
                 allowFullScreen
-                src={`https://maps.google.com/maps?q=${alert.geolocation.lat},${alert.geolocation.lon}&z=6&output=embed&t=k&styles=invert_color:true|visibility:simplified`}
+                src={`https://maps.google.com/maps?q=${alert.lat},${alert.lon}&z=6&output=embed&t=k&styles=invert_color:true|visibility:simplified`}
                 className="filter invert hue-rotate-180 contrast-125"
-              ></iframe>
+              ></iframe>}
             </div>
           </div>
           <div>
@@ -79,13 +79,14 @@ const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({ isOpen, onClo
         <div className="space-y-4">
             <h3 className="text-lg font-semibold text-sentinel-light mb-2">Raw Technical Data</h3>
             <div className="p-4 bg-sentinel-blue rounded-lg border border-sentinel-steel font-mono text-sm text-sentinel-silver space-y-2 overflow-x-auto">
-              <p><span className="text-sentinel-cyan">Token Name:</span> {alert.tokenName}</p>
+              <p><span className="text-sentinel-cyan">Token Name:</span> {alert.token_name}</p>
               <p><span className="text-sentinel-cyan">Timestamp:</span> {new Date(alert.timestamp).toUTCString()}</p>
               <p><span className="text-sentinel-cyan">Source IP:</span> {alert.ip}</p>
-              <p><span className="text-sentinel-cyan">User-Agent:</span> {alert.userAgent}</p>
+              <p><span className="text-sentinel-cyan">Path:</span> {alert.request_path}</p>
+              <p><span className="text-sentinel-cyan">User-Agent:</span> {alert.user_agent}</p>
               <div>
                 <p className="text-sentinel-cyan">Headers:</p>
-                <pre className="pl-4 whitespace-pre-wrap break-all">{JSON.stringify(alert.requestHeaders, null, 2)}</pre>
+                <pre className="pl-4 whitespace-pre-wrap break-all">{JSON.stringify(alert.request_headers, null, 2)}</pre>
               </div>
             </div>
         </div>

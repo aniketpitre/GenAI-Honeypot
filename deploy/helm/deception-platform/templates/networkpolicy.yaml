@@ -1,0 +1,62 @@
+{{- if .Values.networkPolicy.enabled }}
+# Honeypot: reachable from anywhere (it is bait) but can only talk out to DNS,
+# the API (init container) and Logstash. No route to the rest of the cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "dp.fullname" . }}-honeypot
+spec:
+  podSelector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "honeypot") | nindent 6 }}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports: [{port: 22}, {port: 80}]
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector: {matchLabels: {k8s-app: kube-dns}}
+      ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+    - to:
+        - podSelector:
+            matchLabels: {{- include "dp.selector" (dict "root" . "component" "api") | nindent 14 }}
+      ports: [{port: 8080}]
+    {{- if or .Values.logstash.host .Values.dev.elk.enabled }}
+    - ports: [{port: 5044}]   # Logstash (in-cluster or external)
+    {{- end }}
+---
+# API: only the dashboard, the canary listener and the honeypot init job may call it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "dp.fullname" . }}-api
+spec:
+  podSelector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "api") | nindent 6 }}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        {{- range $c := list "ui" "listener" "honeypot" }}
+        - podSelector:
+            matchLabels: {{- include "dp.selector" (dict "root" $ "component" $c) | nindent 14 }}
+        {{- end }}
+      ports: [{port: 8080}]
+---
+# Listener: public, but may only egress to the API (and DNS).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "dp.fullname" . }}-listener
+spec:
+  podSelector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "listener") | nindent 6 }}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector: {matchLabels: {k8s-app: kube-dns}}
+      ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+    - to:
+        - podSelector:
+            matchLabels: {{- include "dp.selector" (dict "root" . "component" "api") | nindent 14 }}
+      ports: [{port: 8080}]
+{{- end }}

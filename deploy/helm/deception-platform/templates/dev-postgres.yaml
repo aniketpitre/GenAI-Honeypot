@@ -1,0 +1,42 @@
+{{- if .Values.dev.postgres.enabled }}
+{{- $sel := dict "root" . "component" "postgres" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "dp.fullname" . }}-postgres
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "dp.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" $sel | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - {name: POSTGRES_DB, value: deception}
+            - {name: POSTGRES_USER, value: deception}
+            - {name: POSTGRES_PASSWORD, value: deception}   # dev only
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
+          ports: [{containerPort: 5432}]
+          readinessProbe: {exec: {command: [pg_isready, -U, deception]}, periodSeconds: 5}
+          volumeMounts: [{name: data, mountPath: /var/lib/postgresql/data}]
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: {requests: {storage: 2Gi}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dp.fullname" . }}-postgres
+spec:
+  selector: {{- include "dp.selector" $sel | nindent 4 }}
+  ports: [{port: 5432}]
+{{- end }}

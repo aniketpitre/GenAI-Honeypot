@@ -1,0 +1,118 @@
+{{- if .Values.honeypot.enabled }}
+{{- $sel := dict "root" . "component" "honeypot" }}
+{{- $shipLogs := or .Values.logstash.host .Values.dev.elk.enabled }}
+{{- $logstash := default (printf "%s-logstash:5044" (include "dp.fullname" .)) .Values.logstash.host }}
+{{- if $shipLogs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dp.fullname" . }}-filebeat
+  labels: {{- include "dp.labels" . | nindent 4 }}
+data:
+  filebeat.yml: |
+{{ .Files.Get "files/filebeat.yml" | indent 4 }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dp.fullname" . }}-honeypot
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" $sel | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false   # a compromised pod must not get cluster credentials
+      enableServiceLinks: false
+      {{- include "dp.pullSecrets" . | nindent 6 }}
+      {{- with .Values.honeypot.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.honeypot.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Generates fake content and plants canary breadcrumbs into the seed volume.
+        - name: generator
+          image: {{ include "dp.image" (dict "root" . "name" "generator") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--output", "/seed"]
+          env:
+            - {name: API_URL, value: {{ printf "http://%s-api:8080" (include "dp.fullname" .) | quote }}}
+            - name: ADMIN_TOKEN
+              valueFrom: {secretKeyRef: {name: {{ include "dp.secretName" . }}, key: ADMIN_TOKEN}}
+            - name: GEMINI_API_KEY
+              valueFrom: {secretKeyRef: {name: {{ include "dp.secretName" . }}, key: GEMINI_API_KEY, optional: true}}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          volumeMounts: [{name: seed, mountPath: /seed}]
+      containers:
+        - name: honeypot
+          image: {{ include "dp.image" (dict "root" . "name" "honeypot") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - {name: ssh, containerPort: 22}
+            - {name: http, containerPort: 80}
+          env:
+            - {name: HONEYPOT_USERS, value: {{ .Values.honeypot.users | quote }}}
+          # sshd needs root + a few capabilities; everything else is dropped.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, DAC_OVERRIDE, FOWNER, KILL, SETUID, SETGID, SYS_CHROOT, AUDIT_WRITE, NET_BIND_SERVICE]
+          readinessProbe: {tcpSocket: {port: ssh}, periodSeconds: 10}
+          resources: {{- toYaml .Values.honeypot.resources | nindent 12 }}
+          volumeMounts:
+            - {name: seed, mountPath: /seed, readOnly: true}
+            - {name: logs, mountPath: /var/log/honeypot}
+        {{- if $shipLogs }}
+        - name: filebeat
+          image: {{ .Values.image.filebeat }}
+          args: ["-e", "--strict.perms=false"]
+          env:
+            - {name: LOGSTASH_HOST, value: {{ $logstash | quote }}}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources: {requests: {cpu: 20m, memory: 64Mi}, limits: {memory: 192Mi}}
+          volumeMounts:
+            - {name: filebeat-config, mountPath: /usr/share/filebeat/filebeat.yml, subPath: filebeat.yml, readOnly: true}
+            - {name: logs, mountPath: /var/log/honeypot, readOnly: true}
+            - {name: filebeat-data, mountPath: /usr/share/filebeat/data}
+        {{- end }}
+      volumes:
+        - {name: seed, emptyDir: {}}
+        - {name: logs, emptyDir: {sizeLimit: 500Mi}}
+        {{- if $shipLogs }}
+        - {name: filebeat-data, emptyDir: {}}
+        - name: filebeat-config
+          configMap: {name: {{ include "dp.fullname" . }}-filebeat, defaultMode: 0444}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dp.fullname" . }}-honeypot
+  labels: {{- include "dp.labels" . | nindent 4 }}
+  {{- with .Values.honeypot.service.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.honeypot.service.type }}
+  selector: {{- include "dp.selector" $sel | nindent 4 }}
+  ports:
+    - {name: ssh, port: {{ .Values.honeypot.service.sshPort }}, targetPort: ssh}
+    - {name: http, port: {{ .Values.honeypot.service.httpPort }}, targetPort: http}
+{{- end }}

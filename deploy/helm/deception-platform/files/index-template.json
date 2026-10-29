@@ -1,0 +1,33 @@
+{
+  "index_patterns": ["deception-events-*"],
+  "template": {
+    "settings": { "number_of_shards": 1, "index.lifecycle.name": "deception-events" },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "message": { "type": "text" },
+        "source": { "properties": {
+          "ip": { "type": "ip" },
+          "port": { "type": "integer" },
+          "geo": { "properties": {
+            "location": { "type": "geo_point" },
+            "city_name": { "type": "keyword" },
+            "country_iso_code": { "type": "keyword" }
+          } }
+        } },
+        "user": { "properties": { "name": { "type": "keyword" } } },
+        "user_agent": { "properties": { "original": { "type": "keyword", "ignore_above": 1024 } } },
+        "url": { "properties": { "path": { "type": "keyword", "ignore_above": 1024 } } },
+        "http": { "properties": { "request": { "properties": {
+          "method": { "type": "keyword" }, "headers": { "type": "flattened" } } },
+          "response": { "properties": { "status_code": { "type": "integer" } } } } },
+        "event": { "properties": {
+          "kind": { "type": "keyword" }, "category": { "type": "keyword" }, "action": { "type": "keyword" },
+          "dataset": { "type": "keyword" }, "outcome": { "type": "keyword" }, "severity": { "type": "integer" } } },
+        "deception": { "properties": {
+          "sensor": { "type": "keyword" }, "alert_id": { "type": "long" },
+          "token": { "properties": { "id": { "type": "keyword" }, "name": { "type": "keyword" }, "type": { "type": "keyword" } } } } }
+      }
+    }
+  }
+}

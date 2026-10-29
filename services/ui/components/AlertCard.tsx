@@ -47,7 +47,7 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert, onClick }) => {
         style={{ animationFillMode: 'forwards', opacity: 0 }}
     >
       <div className="flex justify-between items-start">
-        <h3 className="font-bold text-lg text-sentinel-light pr-2">{alert.tokenName}</h3>
+        <h3 className="font-bold text-lg text-sentinel-light pr-2">{alert.token_name}</h3>
         <div className="flex-shrink-0">
           <StatusIndicator status={alert.status} />
         </div>
@@ -60,7 +60,7 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert, onClick }) => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="text-sentinel-cyan">{ICONS.mapPin}</div>
-          <span>{alert.geolocation.city || 'Unknown City'}, {alert.geolocation.country || 'Unknown Country'}</span>
+          <span>{alert.city || 'Unknown city'}{alert.country ? `, ${alert.country}` : ''}</span>
         </div>
       </div>
 
