@@ -7,4 +7,4 @@ httpx==0.28.1
 geoip2==4.8.1
 google-genai==1.2.0
 alembic==1.14.0
-prometheus-client==0.21.1
+prometheus-client==0.26.0
