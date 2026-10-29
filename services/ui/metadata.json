@@ -1,0 +1,5 @@
+{
+  "name": "Tripwire Sentinel",
+  "description": "An intelligent, centralized platform for security teams to create, manage, and monitor honey tokens to detect and respond to unauthorized system access in real-time.",
+  "requestFramePermissions": []
+}
