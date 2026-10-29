@@ -1,6 +1,6 @@
 # Production deployment guide (Kubernetes)
 
-Verified here: chart lint + Kubernetes schema validation, unit/e2e tests. **Not** verified here (no cluster/Docker available when written): image builds, a live install, Elasticsearch security bootstrap, Prometheus/Grafana objects. Do a staging install first.
+Verified: chart lint + Kubernetes/CRD schema validation, unit/e2e tests, image builds, and the whole pipeline on real containers via Docker Compose (see `docs/PRODUCTION_READINESS.md` §6c). **Not** verified: an install on a real Kubernetes cluster, Terraform apply, Prometheus rule evaluation, Grafana dashboard rendering. Do a staging install first.
 
 ## 0. Prerequisites
 - Kubernetes ≥ 1.27, an Ingress controller (examples use ingress-nginx), cert-manager, a CNI that **enforces NetworkPolicy** (Calico/Cilium), optionally External Secrets Operator and prometheus-operator.
