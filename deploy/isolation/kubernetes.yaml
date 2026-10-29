@@ -1,0 +1,35 @@
+# Cluster-side isolation for the honeypot. Apply once, then install the chart into this namespace
+# with the node pool settings from values.production.yaml.
+#
+#   kubectl apply -f deploy/isolation/kubernetes.yaml
+#   helm upgrade --install dp deploy/helm/deception-platform -n deception -f values.production.yaml
+---
+# gVisor user-space kernel: a container escape lands in the sandbox, not the node kernel.
+# GKE: enable GKE Sandbox on the pool (see terraform/gke.tf). Elsewhere: install runsc and
+# register the handler on the honeypot nodes.
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata: {name: gvisor}
+handler: gvisor
+scheduling:
+  nodeSelector: {pool: honeypot}
+  tolerations: [{key: honeypot, operator: Exists, effect: NoSchedule}]
+---
+# The honeypot runs sshd as root with a few capabilities (all on the "baseline" allow-list), so
+# the namespace enforces baseline and warns on restricted for everything else.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: deception
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+# Default-deny for the whole namespace; the chart's NetworkPolicies then open only what is needed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny-all, namespace: deception}
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]

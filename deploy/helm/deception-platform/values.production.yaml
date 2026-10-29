@@ -27,6 +27,9 @@ ingress:
   canaryHost: files.example.com
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Dashboard live updates use server-sent events: keep connections open and unbuffered.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
     # Dashboard only: restrict to your office/VPN ranges (the canary host must stay public).
     # Use a second Ingress or your controller's per-host allow-list for this.
   tls: {enabled: true}

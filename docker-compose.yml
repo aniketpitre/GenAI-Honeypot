@@ -60,7 +60,7 @@ services:
     <<: *hardened
     build: ./services/ui
     ports: ["127.0.0.1:3000:8080"]
-    tmpfs: [/tmp, /var/cache/nginx]
+    tmpfs: ["/tmp", "/var/cache/nginx", "/etc/nginx/conf.d:uid=101,gid=101,mode=0755"]   # nginx renders its config here at start-up
     depends_on:
       api: {condition: service_healthy}
     mem_limit: 64m

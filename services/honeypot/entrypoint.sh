@@ -31,4 +31,5 @@ cleanup() { pkill nginx || true; pkill rsyslogd || true; }
 trap cleanup SIGTERM SIGINT
 
 echo "[honeypot] ready"
-exec /usr/sbin/sshd -D -e
+# no -e: sshd must log through syslog (AUTH) so events reach the shipped log file
+exec /usr/sbin/sshd -D

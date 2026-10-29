@@ -1,0 +1,43 @@
+# Run:  make prometheus-test   (renders the chart's PrometheusRule and runs promtool against it)
+rule_files: [rules.yml]
+evaluation_interval: 1m
+tests:
+  - name: backlog alert fires only after 5 minutes of non-empty spool
+    interval: 1m
+    input_series:
+      - series: 'canary_spool_size{pod="l1"}'
+        values: '0 0 3 3 3 3 3 3 3 3 0 0'
+    alert_rule_test:
+      - {eval_time: 5m, alertname: CanaryHitsBacklogged, exp_alerts: []}
+      - eval_time: 9m
+        alertname: CanaryHitsBacklogged
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations:
+              summary: Canary hits are waiting in the listener spool
+              description: The API is unreachable or rejecting the listener's key; alerts are delayed.
+      - {eval_time: 11m, alertname: CanaryHitsBacklogged, exp_alerts: []}
+
+  - name: dropped hits alert is immediate
+    interval: 1m
+    input_series:
+      - series: 'canary_hits_total{outcome="dropped",pod="l1"}'
+        values: '0 0 0 1 1 1'
+      - series: 'canary_hits_total{outcome="forwarded",pod="l1"}'
+        values: '0 5 9 14 20 30'
+    alert_rule_test:
+      - {eval_time: 2m, alertname: CanaryHitsDropped, exp_alerts: []}
+      - eval_time: 4m
+        alertname: CanaryHitsDropped
+        exp_alerts:
+          - exp_labels: {severity: critical}
+            exp_annotations: {summary: Canary hits were lost (API down and spool full/unavailable)}
+
+  - name: forwarded traffic alone never pages
+    interval: 1m
+    input_series:
+      - series: 'canary_hits_total{outcome="forwarded",pod="l1"}'
+        values: '0 5 9 14 20 30 40 50'
+    alert_rule_test:
+      - {eval_time: 7m, alertname: CanaryHitsDropped, exp_alerts: []}
+      - {eval_time: 7m, alertname: CanaryHitsBacklogged, exp_alerts: []}

@@ -21,10 +21,10 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 | Replace single shared admin token with real SSO/OIDC + per-user audit trail | ⬜ |
 | Elasticsearch security on in compose and the chart's dev ELK; least-privilege `deception_writer` for API/Logstash; `kibana_system` service account; API supports basic auth/API key + custom CA | ✅ (bootstrap in `pipeline/setup.sh` not run against a live cluster). ⬜ In-cluster TLS between Filebeat/Logstash/ES — use managed ES with TLS for production |
 | Secrets via External Secrets Operator (`externalSecrets.*`) or `existingSecret`; production values example | ✅ |
-| Honeypot `runtimeClassName`, nodeSelector/tolerations for a dedicated pool | ✅ (chart). ⬜ Provision the pool/VPC + cloud egress firewall (yours to do) |
+| Honeypot `runtimeClassName`, nodeSelector/tolerations for a dedicated pool; `deploy/isolation/` (gVisor RuntimeClass, Pod Security namespace, default-deny, Cilium egress, GKE/EKS Terraform for pool + egress firewall) | ✅ files (Kubernetes YAML schema-validated, Terraform parses; **Terraform not applied**). ⬜ Provisioning the real pool/VPC is environment-specific |
 | Trivy image scan (fails on CRITICAL), Trivy config scan, pip-audit, npm audit (`security.yml`); SBOM + provenance + keyless cosign on release | ✅ (workflows not yet run on GitHub). ⬜ Pin base images by digest (Dependabot can then bump them); enforce signatures at admission |
 | Dependabot for pip/npm/docker/actions | ✅ |
-| Hash-pinned lockfile for the API (`requirements.in` → pip-compile → `requirements.txt`, installed with `--require-hashes`) | ✅ API only. ⬜ canary-listener and generator are pinned but not hash-locked yet (`pip-compile --generate-hashes`, then add `--require-hashes` to their Dockerfiles) |
+| Hash-pinned lockfiles for api, canary-listener and generator (`requirements.in` → pip-compile **inside python:3.12** → `requirements.txt`, installed with `--require-hashes`; images built from them) | ✅ |
 | Admin/internal secrets must be ≥ 24 chars (API refuses to start otherwise) | ✅ |
 | Admin login lock-out per client IP (10 fails / 5 min, 429), IP taken from `X-Forwarded-For` per `trustedProxyCount` | ✅ |
 
@@ -47,7 +47,7 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 - ⬜ MaxMind GeoLite2 + ASN/Tor/VPN/cloud-provider enrichment (supported via `GEOIP_DB_PATH`, DB not bundled — licence).
 - ⬜ Email-client/AV pre-fetch detection (pixels fire from scanners; tag by UA/ASN to cut false positives).
 - ⬜ Interactive honeypot: LLM-backed shell (e.g. Cowrie fork) so attackers can run commands, with strict output filtering and cost caps. Today the bait is static.
-- ⬜ Notifications beyond one webhook: PagerDuty, email, MS Teams, per-token routing; SSE/WebSocket push to the UI instead of 5 s polling.
+- ✅ Live dashboard updates over server-sent events (`/api/v1/stream`), fanned out across API replicas with Postgres LISTEN/NOTIFY (30 s polling kept as a safety net). ⬜ Notifications beyond one webhook: PagerDuty, email, MS Teams, per-token routing.
 - ⬜ Export to SIEM (Splunk/Sentinel) and STIX/MISP for threat-intel sharing.
 
 ## 6. Delivery
@@ -59,6 +59,10 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 
 ## 6b. Docs
 - ✅ `docs/DEPLOYMENT.md` (production install + verification checklist), `docs/RUNBOOK.md` (rotation, upgrades, backups, alert playbooks).
+
+## 6c. What was verified on real containers (Docker daemon available in the later authoring session)
+Images for api, canary-listener, generator, honeypot and ui build from the hash-locked requirements; the honeypot accepts SSH logins and logs them; the real Logstash 8.14 container parses the honeypot's actual auth/nginx lines; the Elasticsearch security bootstrap and Kibana saved-object import run to completion; the UI container serves with the security headers and proxies `/api`. This found and fixed: API image missing `migrations/`, sshd `-e` bypassing syslog, non-traditional rsyslog timestamps, UI read-only-fs start-up, setup job not retrying ES 503s, and a 3.13-compiled lockfile that broke the 3.12 image.
+**Still unverified:** `tests/e2e/compose_smoke.py` (full-stack run) on a clean machine, `tests/prometheus` rule tests (needs the Prometheus image), the GitHub Actions workflows, Terraform apply, and an install on a real Kubernetes cluster.
 
 ## 7. Suggested order of work
 1. **Before any internet exposure:** enable Elasticsearch security + TLS; real secret management; restrict dashboard ingress (VPN/IP allow-list); run the honeypot in its own isolated cluster/namespace with egress firewall.
