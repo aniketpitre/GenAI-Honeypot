@@ -26,4 +26,6 @@ spec:
         paths:
           - {path: /t/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
           - {path: /p/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
+          - {path: /aws/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
+          - {path: /k8s/, pathType: Prefix, backend: {service: {name: {{ include "dp.fullname" . }}-listener, port: {name: http}}}}
 {{- end }}

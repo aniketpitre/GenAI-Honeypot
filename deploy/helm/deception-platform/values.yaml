@@ -74,6 +74,11 @@ ingress:
 networkPolicy:
   enabled: true
 
+# Requires prometheus-operator CRDs / a Grafana dashboard sidecar (label grafana_dashboard=1).
+monitoring:
+  prometheusRule: {enabled: false}
+  grafanaDashboard: {enabled: false}
+
 # --- dev/demo dependencies (NOT for production) ------------------------------------
 dev:
   postgres: {enabled: false}

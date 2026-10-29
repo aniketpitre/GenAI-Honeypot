@@ -48,11 +48,11 @@ jobs:
       - uses: azure/setup-helm@v4
       - name: helm lint + schema-validate
         run: |
-          ARGS="--set secrets.adminToken=a,secrets.internalApiKey=b,dev.postgres.enabled=true,dev.elk.enabled=true"
+          ARGS="--set secrets.adminToken=a,secrets.internalApiKey=b,dev.postgres.enabled=true,dev.elk.enabled=true,monitoring.prometheusRule.enabled=true,monitoring.grafanaDashboard.enabled=true"
           helm lint deploy/helm/deception-platform $ARGS
           helm template t deploy/helm/deception-platform $ARGS > /tmp/render.yaml
           curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
-          ./kubeconform -strict -summary -kubernetes-version 1.30.0 /tmp/render.yaml
+          ./kubeconform -strict -ignore-missing-schemas -summary -kubernetes-version 1.30.0 /tmp/render.yaml
 
   images:
     runs-on: ubuntu-latest

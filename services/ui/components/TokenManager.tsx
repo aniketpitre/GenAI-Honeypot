@@ -22,7 +22,8 @@ const TokenManager: React.FC<TokenManagerProps> = ({ tokens, onUpdateToken, onDe
     const url = URL.createObjectURL(await api.downloadToken(token.id));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${token.name.replace(/[^\w.-]+/g, '_')}.docx`;
+    const ext = { document: '.docx', aws: '.credentials', kubeconfig: '.kubeconfig.yaml' }[token.type as string] ?? '';
+    a.download = `${token.name.replace(/[^\w.-]+/g, '_')}${ext}`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -88,8 +89,8 @@ const TokenManager: React.FC<TokenManagerProps> = ({ tokens, onUpdateToken, onDe
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end space-x-2">
-                    {token.type === 'document' && (
-                      <button onClick={() => handleDownload(token)} className="px-2 py-1 text-xs font-semibold hover:bg-sentinel-steel rounded-md">Download .docx</button>
+                    {['document', 'aws', 'kubeconfig'].includes(token.type) && (
+                      <button onClick={() => handleDownload(token)} className="px-2 py-1 text-xs font-semibold hover:bg-sentinel-steel rounded-md">Download</button>
                     )}
                     <button onClick={() => onDeleteToken(token.id)} className="p-2 hover:bg-sentinel-steel rounded-full text-sentinel-red">{ICONS.trash}</button>
                   </div>

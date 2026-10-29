@@ -5,7 +5,7 @@ One project, two kinds of tripwire, one alert pipeline:
 | Sensor | What it catches | How |
 |---|---|---|
 | **Honeypot** (SSH + web) | Attackers poking at a fake Debian server | Bait filesystem written by Gemini (`auth.log`, `.bash_history`, `todo.txt`); SSH/nginx logs shipped Filebeat → Logstash → Elasticsearch |
-| **Canary tokens** (URL, pixel, Word doc) | Someone using stolen data or opening a planted document, **anywhere** | Unique link/pixel → `canary-listener` → API → alert with real IP, GeoIP, headers |
+| **Canary tokens** (URL, pixel, Word doc, fake AWS keys, fake kubeconfig) | Someone using stolen data, a leaked cloud credential or cluster access, or opening a planted document, **anywhere** | Unique link/pixel/endpoint → `canary-listener` → API → alert with real IP, GeoIP, headers (and the decoy AWS key id used) |
 | **Breadcrumbs** | Attackers who steal the honeypot's files and use them elsewhere | The generator plants canary URLs *inside* the fake files, so exfiltrated bait phones home |
 
 All events share one schema (`docs/EVENT_SCHEMA.md`) and land in the same Elasticsearch index (`deception-events-*`), so a single Kibana dashboard shows SSH brute-force, web probes and canary hits side by side. The React dashboard (Tripwire) is for triage: alert status, analyst notes, token management.
@@ -21,6 +21,16 @@ All events share one schema (`docs/EVENT_SCHEMA.md`) and land in the same Elasti
                  ▲
    generator (init job): Gemini content + canary breadcrumbs
 ```
+
+### Token types
+| Type | Plant it | Fires when |
+|---|---|---|
+| URL / pixel | wikis, emails, web pages | the link or image is fetched |
+| Word document | file shares, mailboxes | the doc is opened with external content on |
+| Fake AWS keys | repos, laptops, CI variables | any `aws`/SDK call uses the profile (its `endpoint_url` is the canary) |
+| Fake kubeconfig | repos, home dirs, CI secrets | `kubectl`/`k9s`/client libs use it (verified with real kubectl) |
+
+The dashboard shows an IP that touches several *different* tokens in red: that is almost always a real intruder rather than a scanner.
 
 ## Quick start (Docker Compose)
 

@@ -1,0 +1,42 @@
+{{- if .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "dp.fullname" . }}
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: deception-platform
+      rules:
+        - alert: CanaryHitsBacklogged
+          expr: max(canary_spool_size) > 0
+          for: 5m
+          labels: {severity: warning}
+          annotations:
+            summary: Canary hits are waiting in the listener spool
+            description: The API is unreachable or rejecting the listener's key; alerts are delayed.
+        - alert: CanaryHitsDropped
+          expr: increase(canary_hits_total{outcome="dropped"}[10m]) > 0
+          for: 0m
+          labels: {severity: critical}
+          annotations:
+            summary: Canary hits were lost (API down and spool full/unavailable)
+        - alert: EventPublishFailing
+          expr: increase(deception_event_publish_failures_total[15m]) > 5
+          labels: {severity: warning}
+          annotations:
+            summary: Events are not reaching Elasticsearch or the alert webhook
+{{- end }}
+{{- if .Values.monitoring.grafanaDashboard.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dp.fullname" . }}-dashboard
+  labels:
+    grafana_dashboard: "1"
+    {{- include "dp.labels" . | nindent 4 }}
+data:
+  deception-platform.json: |
+{{ .Files.Get "files/grafana-dashboard.json" | indent 4 }}
+{{- end }}

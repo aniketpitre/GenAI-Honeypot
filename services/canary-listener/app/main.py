@@ -3,6 +3,7 @@ the same way for every id (valid or not) and forwards the hit to the API."""
 import asyncio
 import base64
 import logging
+import re
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -10,7 +11,7 @@ from collections import defaultdict, deque
 
 import httpx
 from fastapi import BackgroundTasks, FastAPI, Request, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, generate_latest
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -122,12 +123,13 @@ async def forward(payload: dict) -> None:
         log.error("hit lost: API down and spool unavailable/full")
 
 
-def _record(request: Request, token_id: str, bg: BackgroundTasks) -> None:
+def _record(request: Request, token_id: str, bg: BackgroundTasks, extra: dict | None = None) -> None:
     ip = client_ip(request, settings.trusted_proxy_count)
     if not allowed(ip, settings.rate_limit_per_minute):
         HITS.labels("rate_limited").inc()
         return
     headers = {k: v[:500] for k, v in request.headers.items() if k.lower() not in DROP_HEADERS}
+    headers.update(extra or {})
     bg.add_task(forward, {
         "hit_id": uuid.uuid4().hex, "token_id": token_id[:64], "ip": ip, "path": request.url.path,
         "user_agent": request.headers.get("user-agent", "")[:2000], "headers": headers,
@@ -138,6 +140,33 @@ def _record(request: Request, token_id: str, bg: BackgroundTasks) -> None:
 async def trap(token_id: str, request: Request, bg: BackgroundTasks):
     _record(request, token_id, bg)
     return HTMLResponse(DECOY, status_code=403)
+
+
+AWS_ERROR = """<ErrorResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/"><Error><Type>Sender</Type>
+<Code>InvalidClientTokenId</Code><Message>The security token included in the request is invalid.</Message></Error>
+<RequestId>b6d2a0e1-7c1f-4b0e-9a3c-5d1f2e8a9c10</RequestId></ErrorResponse>"""
+K8S_ERROR = {"kind": "Status", "apiVersion": "v1", "metadata": {}, "status": "Failure",
+             "message": "Unauthorized", "reason": "Unauthorized", "code": 401}
+_AWS_KEY = re.compile(r"Credential=([A-Z0-9]{16,32})/")
+
+
+@app.api_route("/aws/{token_id}/{rest:path}", methods=["GET", "HEAD", "POST", "PUT", "DELETE"])
+@app.api_route("/aws/{token_id}", methods=["GET", "HEAD", "POST", "PUT", "DELETE"])
+async def aws_endpoint(token_id: str, request: Request, bg: BackgroundTasks, rest: str = ""):
+    """Target of `endpoint_url` in a decoy AWS credentials file. The SigV4
+    Authorization header is dropped from the record, but the access key id (a
+    public identifier) is kept so you can see which decoy key was used."""
+    m = _AWS_KEY.search(request.headers.get("authorization", ""))
+    _record(request, token_id, bg, {"x-canary-aws-access-key-id": m.group(1)} if m else None)
+    return Response(AWS_ERROR, status_code=403, media_type="text/xml")
+
+
+@app.api_route("/k8s/{token_id}/{rest:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"])
+@app.api_route("/k8s/{token_id}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"])
+async def k8s_endpoint(token_id: str, request: Request, bg: BackgroundTasks, rest: str = ""):
+    """Target of `server:` in a decoy kubeconfig (kubectl, k9s, client libraries)."""
+    _record(request, token_id, bg)
+    return JSONResponse(K8S_ERROR, status_code=401)
 
 
 @app.get("/p/{token_id}.png")

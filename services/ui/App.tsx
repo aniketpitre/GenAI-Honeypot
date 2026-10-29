@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { HoneyToken, Alert, View } from './types';
+import { HoneyToken, Alert, Stats, View } from './types';
 import { ICONS } from './constants';
 import { api, auth, AuthError } from './services/api';
 import Dashboard from './components/Dashboard';
@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('dashboard');
   const [tokens, setTokens] = useState<HoneyToken[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -27,8 +28,9 @@ const App: React.FC = () => {
 
   const refresh = useCallback(async () => {
     try {
-      const [t, a] = await Promise.all([api.getTokens(), api.getAlerts()]);
+      const [t, a, st] = await Promise.all([api.getTokens(), api.getAlerts(), api.getStats()]);
       setTokens(t);
+      setStats(st);
       setAlerts(a);
       setLoadError('');
     } catch (e) {
@@ -109,7 +111,7 @@ const App: React.FC = () => {
         ) : (
           <>
             {view === 'dashboard' && (
-              <Dashboard alerts={alerts} onUpdateAlert={(a) => guarded(() => api.updateAlert(a.id, { notes: a.notes, status: a.status }))} />
+              <Dashboard alerts={alerts} stats={stats} onUpdateAlert={(a) => guarded(() => api.updateAlert(a.id, { notes: a.notes, status: a.status }))} />
             )}
             {view === 'tokens' && (
               <TokenManager

@@ -43,16 +43,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             {children}
         </div>
       </div>
-       <style>{`
-        @keyframes slideIn {
-          from { transform: translateY(-20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
     </div>
   );
 };

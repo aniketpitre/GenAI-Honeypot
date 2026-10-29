@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-TokenType = Literal["url", "pixel", "document"]
+TokenType = Literal["url", "pixel", "document", "aws", "kubeconfig"]
 AlertStatus = Literal["New", "Investigating", "False Positive", "Resolved"]
 
 

@@ -102,3 +102,21 @@ def test_hit_has_unique_id_and_metrics(sent):
     c.get("/t/a"); c.get("/t/a")
     assert sent[0]["hit_id"] != sent[1]["hit_id"]
     assert "canary_hits_total" in c.get("/metrics").text
+
+
+def test_aws_endpoint_keeps_key_id_not_signature(sent):
+    auth = "AWS4-HMAC-SHA256 Credential=AKIAABCDEFGHIJKLMNOP/20261029/us-east-1/s3/aws4_request, SignedHeaders=host, Signature=deadbeef"
+    r = TestClient(app).get("/aws/tok1/bucket/key", headers={"Authorization": auth, "User-Agent": "aws-cli/2.15"})
+    assert r.status_code == 403 and "InvalidClientTokenId" in r.text
+    p = sent[0]
+    assert p["token_id"] == "tok1" and p["headers"]["x-canary-aws-access-key-id"] == "AKIAABCDEFGHIJKLMNOP"
+    assert "authorization" not in p["headers"] and "deadbeef" not in str(p)
+
+
+def test_k8s_endpoint_looks_like_apiserver(sent):
+    c = TestClient(app)
+    r = c.get("/k8s/tok2/api/v1/namespaces", headers={"Authorization": "Bearer abc"})
+    assert r.status_code == 401 and r.json()["kind"] == "Status"
+    assert c.post("/k8s/tok2").status_code == 401
+    assert sent[0]["token_id"] == "tok2" and sent[0]["path"] == "/k8s/tok2/api/v1/namespaces"
+    assert "authorization" not in sent[0]["headers"]
