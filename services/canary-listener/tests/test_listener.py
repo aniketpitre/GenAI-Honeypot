@@ -43,3 +43,62 @@ def test_rate_limit(sent, monkeypatch):
     for _ in range(10):
         assert c.get("/t/x", headers={"X-Forwarded-For": "9.9.9.9"}).status_code == 403
     assert len(sent) == 3
+
+
+def test_spool_roundtrip_and_order(tmp_path):
+    import asyncio
+
+    from app.spool import Spool
+
+    async def go():
+        sp = Spool(str(tmp_path), max_entries=3)
+        for i in range(3):
+            assert await sp.add({"n": i})
+        assert not await sp.add({"n": 99})  # full
+        seen = []
+
+        async def flaky(p):
+            seen.append(p["n"])
+            return p["n"] != 1  # n=1 fails -> n=1,2 stay queued, in order
+
+        assert await sp.drain(flaky) == 2
+        assert seen == [0, 1]
+        assert await sp.drain(lambda p: _ok()) == 0
+
+    async def _ok():
+        return True
+
+    asyncio.run(go())
+
+
+def test_api_down_spools_then_retries(monkeypatch, tmp_path):
+    import asyncio
+
+    from app.spool import Spool
+
+    async def go():
+        main.spool = Spool(str(tmp_path))
+        up = {"v": False}
+        sent = []
+
+        async def fake_post(payload):
+            if not up["v"]:
+                return False
+            sent.append(payload)
+            return True
+
+        monkeypatch.setattr(main, "post_hit", fake_post)
+        await main.forward({"hit_id": "h1"})
+        assert main.spool.size() == 1 and not sent
+        up["v"] = True
+        assert await main.spool.drain(main.post_hit) == 0
+        assert sent == [{"hit_id": "h1"}]
+
+    asyncio.run(go())
+
+
+def test_hit_has_unique_id_and_metrics(sent):
+    c = TestClient(app)
+    c.get("/t/a"); c.get("/t/a")
+    assert sent[0]["hit_id"] != sent[1]["hit_id"]
+    assert "canary_hits_total" in c.get("/metrics").text

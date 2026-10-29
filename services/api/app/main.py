@@ -3,6 +3,8 @@ import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -13,6 +15,8 @@ from .db import Alert, Token, get_db
 from .docx_canary import build_docx
 from .events import canary_event, publish
 from .geo import lookup
+from .metrics import HITS
+from .migrate import run_migrations
 from .schemas import (
     AlertOut, AlertUpdate, GenerateUrlsIn, HitIn, TokenCreate, TokenOut, TokenUpdate,
 )
@@ -22,14 +26,20 @@ from .urlgen import generate_deceptive_urls
 log = logging.getLogger("deception.api")
 
 
+MIN_SECRET_LEN = 24
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     s = get_settings()
     logging.basicConfig(level=s.log_level)
-    if dbm._engine is None:
-        dbm.init_engine()
-    if not s.admin_token or not s.internal_api_key:
-        log.warning("ADMIN_TOKEN / INTERNAL_API_KEY not set: authenticated routes will reject all requests")
+    for name, value in (("ADMIN_TOKEN", s.admin_token), ("INTERNAL_API_KEY", s.internal_api_key)):
+        if not value:
+            log.warning("%s not set: authenticated routes will reject all requests", name)
+        elif len(value) < MIN_SECRET_LEN:
+            raise RuntimeError(f"{name} must be at least {MIN_SECRET_LEN} characters (try: openssl rand -hex 32)")
+    if dbm._engine is None:  # tests pre-initialise an in-memory engine
+        run_migrations(dbm.get_engine())
     yield
 
 
@@ -84,6 +94,12 @@ def readyz():
     except Exception:
         raise HTTPException(503, "database unavailable")
     return {"status": "ready"}
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics():
+    # Not routed by the ingress or the UI proxy; scrape it in-cluster only.
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 # ---- tokens -----------------------------------------------------------------
@@ -182,13 +198,20 @@ async def record_hit(hit: HitIn, bg: BackgroundTasks, db: Session = Depends(get_
     # Unknown/disabled tokens are dropped silently so the listener (and thus the
     # attacker) can't distinguish them.
     if not token or token.status != "active":
+        HITS.labels("dropped").inc()
         return {"recorded": False}
     geo = lookup(hit.ip)
     alert = Alert(
-        token_id=token.id, ip=hit.ip, user_agent=hit.user_agent, request_path=hit.path,
-        request_headers=hit.headers, **geo,
+        hit_id=hit.hit_id, token_id=token.id, ip=hit.ip, user_agent=hit.user_agent,
+        request_path=hit.path, request_headers=hit.headers, **geo,
     )
     db.add(alert)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:  # redelivery of a hit we already stored
+        db.rollback()
+        HITS.labels("duplicate").inc()
+        return {"recorded": True}
+    HITS.labels("recorded").inc()
     bg.add_task(publish, canary_event(token, alert))
     return {"recorded": True}

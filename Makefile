@@ -1,4 +1,4 @@
-.PHONY: help up up-all down test lint ui-build sync-chart helm-lint
+.PHONY: help up up-all down test e2e lint ui-build sync-chart helm-lint
 help:           ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/ -\t/'
 up:             ## core stack (api, canary-listener, ui, postgres)
@@ -11,6 +11,8 @@ test:           ## run all unit tests
 	cd services/api && python -m pytest -q
 	cd services/canary-listener && python -m pytest -q
 	cd services/generator && python -m pytest -q
+e2e:            ## full flow without Docker: generator -> trap -> alert, incl. API outage
+	python tests/e2e/run_e2e.py
 ui-build:       ## typecheck + build the dashboard
 	cd services/ui && npm ci && npm run build
 

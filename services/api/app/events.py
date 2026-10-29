@@ -9,6 +9,7 @@ import httpx
 
 from .config import get_settings
 from .db import Alert, Token
+from .metrics import EVENT_PUBLISH_FAILURES
 
 event_log = logging.getLogger("deception.events")
 if not event_log.handlers:
@@ -64,6 +65,7 @@ async def publish(event: dict) -> None:
             try:
                 (await client.post(url, json=event)).raise_for_status()
             except Exception as exc:
+                EVENT_PUBLISH_FAILURES.labels("elasticsearch").inc()
                 log.warning("elasticsearch write failed: %s", exc)
         if s.webhook_url:
             tok = event["deception"]["token"]
@@ -74,4 +76,5 @@ async def publish(event: dict) -> None:
             try:
                 await client.post(s.webhook_url, json={"text": text})
             except Exception as exc:
+                EVENT_PUBLISH_FAILURES.labels("webhook").inc()
                 log.warning("webhook failed: %s", exc)

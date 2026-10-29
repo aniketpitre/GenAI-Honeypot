@@ -76,3 +76,18 @@ def test_generate_urls_fallback(client):
 def test_health(client):
     assert client.get("/healthz").status_code == 200
     assert client.get("/readyz").status_code == 200
+
+
+def test_duplicate_hit_id_is_idempotent(client):
+    t = make_token(client)
+    body = {"token_id": t["id"], "ip": "8.8.8.8", "hit_id": "same-hit"}
+    assert client.post("/internal/v1/hits", headers=INTERNAL, json=body).json() == {"recorded": True}
+    assert client.post("/internal/v1/hits", headers=INTERNAL, json=body).json() == {"recorded": True}
+    assert len(client.get("/api/v1/alerts", headers=ADMIN).json()) == 1
+
+
+def test_metrics_endpoint(client):
+    t = make_token(client)
+    client.post("/internal/v1/hits", headers=INTERNAL, json={"token_id": t["id"], "ip": "8.8.8.8"})
+    text = client.get("/metrics").text
+    assert 'deception_hits_total{result="recorded"}' in text

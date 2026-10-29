@@ -11,6 +11,10 @@ spec:
   template:
     metadata:
       labels: {{- include "dp.selector" $sel | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /metrics
     spec:
       automountServiceAccountToken: false
       {{- include "dp.pullSecrets" . | nindent 6 }}

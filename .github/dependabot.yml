@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - {package-ecosystem: pip, directory: /services/api, schedule: {interval: weekly}}
+  - {package-ecosystem: pip, directory: /services/canary-listener, schedule: {interval: weekly}}
+  - {package-ecosystem: pip, directory: /services/generator, schedule: {interval: weekly}}
+  - {package-ecosystem: npm, directory: /services/ui, schedule: {interval: weekly}}
+  - {package-ecosystem: docker, directory: /services/api, schedule: {interval: weekly}}
+  - {package-ecosystem: docker, directory: /services/honeypot, schedule: {interval: weekly}}
+  - {package-ecosystem: github-actions, directory: /, schedule: {interval: weekly}}

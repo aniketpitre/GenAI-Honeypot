@@ -35,6 +35,8 @@ class Alert(Base):
     __tablename__ = "alerts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # Listener-generated id; makes redelivered hits idempotent.
+    hit_id: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     token_id: Mapped[str] = mapped_column(ForeignKey("tokens.id", ondelete="CASCADE"), index=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     ip: Mapped[str] = mapped_column(String(64))
@@ -55,8 +57,9 @@ _engine = None
 _SessionLocal: sessionmaker[Session] | None = None
 
 
-def init_engine(url: str | None = None) -> None:
-    """(Re)initialise the engine. Tests call this with an in-memory SQLite URL."""
+def init_engine(url: str | None = None, create_all: bool = False) -> None:
+    """(Re)initialise the engine. Tests pass create_all=True with an in-memory SQLite URL;
+    real deployments use Alembic (app.migrate)."""
     global _engine, _SessionLocal
     url = url or get_settings().database_url
     kwargs: dict = {"pool_pre_ping": True}
@@ -66,7 +69,14 @@ def init_engine(url: str | None = None) -> None:
             kwargs["poolclass"] = StaticPool
     _engine = create_engine(url, **kwargs)
     _SessionLocal = sessionmaker(_engine, expire_on_commit=False)
-    Base.metadata.create_all(_engine)
+    if create_all:
+        Base.metadata.create_all(_engine)
+
+
+def get_engine():
+    if _engine is None:
+        init_engine()
+    return _engine
 
 
 def get_db() -> Iterator[Session]:
