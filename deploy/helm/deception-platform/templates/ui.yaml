@@ -15,6 +15,7 @@ spec:
       automountServiceAccountToken: false
       {{- include "dp.pullSecrets" . | nindent 6 }}
       {{- include "dp.podSecurity" (dict "uid" 101) | nindent 6 }}
+      {{- include "dp.affinity" $sel | nindent 6 }}
       containers:
         - name: ui
           image: {{ include "dp.image" (dict "root" . "name" "ui") }}

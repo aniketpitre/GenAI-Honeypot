@@ -21,6 +21,7 @@ spec:
       automountServiceAccountToken: false
       {{- include "dp.pullSecrets" . | nindent 6 }}
       {{- include "dp.podSecurity" (dict) | nindent 6 }}
+      {{- include "dp.affinity" $sel | nindent 6 }}
       containers:
         - name: listener
           image: {{ include "dp.image" (dict "root" . "name" "listener") }}

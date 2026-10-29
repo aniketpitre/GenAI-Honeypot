@@ -58,12 +58,17 @@ async def publish(event: dict) -> None:
     """stdout (for log shippers) + best-effort direct write to Elasticsearch + webhook."""
     event_log.info(json.dumps(event, separators=(",", ":")))
     s = get_settings()
-    async with httpx.AsyncClient(timeout=5) as client:
+    headers, auth, verify = {}, None, s.elasticsearch_ca_file or True
+    if s.elasticsearch_api_key:
+        headers["Authorization"] = f"ApiKey {s.elasticsearch_api_key}"
+    elif s.elasticsearch_user:
+        auth = (s.elasticsearch_user, s.elasticsearch_password)
+    async with httpx.AsyncClient(timeout=5, verify=verify) as client:
         if s.elasticsearch_url:
             day = datetime.now(timezone.utc).strftime("%Y.%m.%d")
             url = f"{s.elasticsearch_url.rstrip('/')}/{s.elasticsearch_index_prefix}-{day}/_doc"
             try:
-                (await client.post(url, json=event)).raise_for_status()
+                (await client.post(url, json=event, headers=headers, auth=auth)).raise_for_status()
             except Exception as exc:
                 EVENT_PUBLISH_FAILURES.labels("elasticsearch").inc()
                 log.warning("elasticsearch write failed: %s", exc)

@@ -35,14 +35,15 @@ The dashboard shows an IP that touches several *different* tokens in red: that i
 ## Quick start (Docker Compose)
 
 ```bash
-cp .env.example .env            # fill POSTGRES_PASSWORD, ADMIN_TOKEN, INTERNAL_API_KEY (openssl rand -hex 32)
+cp .env.example .env            # fill POSTGRES_PASSWORD, ADMIN_TOKEN, INTERNAL_API_KEY (openssl rand -hex 32);
+                                # for --profile elk also ELASTIC_PASSWORD, ES_WRITER_PASSWORD, KIBANA_PASSWORD
 make up                         # core: postgres, api, canary-listener, dashboard
 make up-all                     # + honeypot, filebeat, elasticsearch, logstash, kibana
 ```
 
 - Dashboard: http://localhost:3000 — sign in with `ADMIN_TOKEN`
 - Canary listener: http://localhost:8081 (set `CANARY_BASE_URL` to its public address)
-- Kibana: http://localhost:5601 → dashboard "Deception Platform - Overview" (needs `ELASTICSEARCH_URL=http://elasticsearch:9200` in `.env` for canary events to be indexed)
+- Kibana: http://localhost:5601 (user `elastic`) → dashboard "Deception Platform - Overview" (needs `ELASTICSEARCH_URL=http://elasticsearch:9200` in `.env` for canary events to be indexed)
 - Honeypot: `ssh sysadmin@localhost -p 2222` (password `sysadmin`) and http://localhost:8088
 
 Without `GEMINI_API_KEY` the generator and decoy-URL feature fall back to canned content.
@@ -58,6 +59,8 @@ helm install dp deploy/helm/deception-platform \
 # demo cluster (kind/minikube): add --set dev.postgres.enabled=true --set dev.elk.enabled=true
 ```
 
+For production use `values.production.yaml` and follow **`docs/DEPLOYMENT.md`** (secrets via External Secrets, managed Postgres/Elasticsearch, isolated honeypot pool, verification checklist); day-2 tasks are in **`docs/RUNBOOK.md`**.
+
 The chart ships hardened pod specs, NetworkPolicies (the honeypot pod cannot reach anything but DNS, the API init call and Logstash), HPA/PDB for the listener, and an Ingress. See `docs/PRODUCTION_READINESS.md` before exposing it to the internet.
 
 ## Layout
@@ -70,7 +73,7 @@ services/honeypot          sshd + nginx bait container (no secrets inside)
 services/ui                Tripwire dashboard (React/Vite/Tailwind)
 pipeline/                  filebeat, logstash, ES template/ILM, Kibana objects
 deploy/helm/               Helm chart
-docs/                      ARCHITECTURE, EVENT_SCHEMA, PRODUCTION_READINESS, legacy/ (v1.1 docs)
+docs/                      ARCHITECTURE, EVENT_SCHEMA, DEPLOYMENT, RUNBOOK, PRODUCTION_READINESS, legacy/
 ```
 
 `make test` runs all unit tests; `make sync-chart` copies `pipeline/` configs into the chart (CI fails on drift).
