@@ -1,0 +1,6 @@
+apiVersion: v2
+name: deception-platform
+description: AI honeypot + canary tokens - API, canary listener, dashboard, SSH/web honeypot
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

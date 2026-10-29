@@ -1,0 +1,53 @@
+{{- $sel := dict "root" . "component" "api" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dp.fullname" . }}-api
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" $sel | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- include "dp.pullSecrets" . | nindent 6 }}
+      {{- include "dp.podSecurity" (dict) | nindent 6 }}
+      containers:
+        - name: api
+          image: {{ include "dp.image" (dict "root" . "name" "api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports: [{name: http, containerPort: 8080}]
+          env:
+            - {name: CANARY_BASE_URL, value: {{ .Values.canary.baseUrl | quote }}}
+            - {name: ELASTICSEARCH_URL, value: {{ .Values.elasticsearch.url | default (ternary (printf "http://%s-elasticsearch:9200" (include "dp.fullname" .)) "" .Values.dev.elk.enabled) | quote }}}
+          envFrom:
+            - secretRef: {name: {{ include "dp.secretName" . }}}
+          readinessProbe: {httpGet: {path: /readyz, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 20}
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          {{- include "dp.containerSecurity" . | nindent 10 }}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dp.fullname" . }}-api
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "dp.selector" $sel | nindent 4 }}
+  ports: [{name: http, port: 8080, targetPort: http}]
+{{- if gt (int .Values.api.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "dp.fullname" . }}-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+{{- end }}

@@ -1,0 +1,148 @@
+{{- if .Values.dev.elk.enabled }}
+{{- $name := include "dp.fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-elk-config
+data:
+  honeypot.conf: |
+{{ .Files.Get "files/logstash-honeypot.conf" | indent 4 }}
+  ilm-policy.json: |
+{{ .Files.Get "files/ilm-policy.json" | indent 4 }}
+  index-template.json: |
+{{ .Files.Get "files/index-template.json" | indent 4 }}
+  deception.ndjson: |
+{{ .Files.Get "files/deception.ndjson" | indent 4 }}
+  setup.sh: |
+{{ .Files.Get "files/setup.sh" | indent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $name }}-elasticsearch
+spec:
+  serviceName: {{ $name }}-elasticsearch
+  replicas: 1
+  selector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "elasticsearch") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" (dict "root" . "component" "elasticsearch") | nindent 8 }}
+    spec:
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+          env:
+            - {name: discovery.type, value: single-node}
+            - {name: xpack.security.enabled, value: "false"}   # dev only
+            - {name: ES_JAVA_OPTS, value: "-Xms512m -Xmx512m"}
+          ports: [{containerPort: 9200}]
+          resources: {requests: {memory: 1Gi}, limits: {memory: 1Gi}}
+          readinessProbe: {httpGet: {path: /_cluster/health, port: 9200}, initialDelaySeconds: 20, periodSeconds: 10}
+          volumeMounts: [{name: data, mountPath: /usr/share/elasticsearch/data}]
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: {requests: {storage: 5Gi}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-elasticsearch
+spec:
+  selector: {{- include "dp.selector" (dict "root" . "component" "elasticsearch") | nindent 4 }}
+  ports: [{port: 9200}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "logstash") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" (dict "root" . "component" "logstash") | nindent 8 }}
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:8.14.0
+          env:
+            - {name: ELASTICSEARCH_URL, value: {{ printf "http://%s-elasticsearch:9200" $name | quote }}}
+            - {name: LS_JAVA_OPTS, value: "-Xms256m -Xmx256m"}
+          ports: [{containerPort: 5044}]
+          resources: {requests: {memory: 768Mi}, limits: {memory: 768Mi}}
+          volumeMounts:
+            - {name: config, mountPath: /usr/share/logstash/pipeline/honeypot.conf, subPath: honeypot.conf}
+      volumes:
+        - name: config
+          configMap: {name: {{ $name }}-elk-config}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-logstash
+spec:
+  selector: {{- include "dp.selector" (dict "root" . "component" "logstash") | nindent 4 }}
+  ports: [{port: 5044}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "dp.selector" (dict "root" . "component" "kibana") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" (dict "root" . "component" "kibana") | nindent 8 }}
+    spec:
+      containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:8.14.0
+          env:
+            - {name: ELASTICSEARCH_HOSTS, value: {{ printf "http://%s-elasticsearch:9200" $name | quote }}}
+          ports: [{containerPort: 5601}]
+          resources: {requests: {memory: 1Gi}, limits: {memory: 1Gi}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-kibana
+spec:
+  selector: {{- include "dp.selector" (dict "root" . "component" "kibana") | nindent 4 }}
+  ports: [{port: 5601}]
+---
+# Loads the index template + Kibana objects. Logstash is gated on it in compose;
+# here it runs as a post-install hook (re-run it with `helm upgrade` if needed).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}-elk-setup
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 20
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: setup
+          image: curlimages/curl:8.10.1
+          command: ["sh", "/pipeline/setup.sh"]
+          env:
+            - {name: ELASTICSEARCH_URL, value: {{ printf "http://%s-elasticsearch:9200" $name | quote }}}
+            - {name: KIBANA_URL, value: {{ printf "http://%s-kibana:5601" $name | quote }}}
+          volumeMounts:
+            - {name: config, mountPath: /pipeline/setup.sh, subPath: setup.sh}
+            - {name: config, mountPath: /pipeline/elasticsearch/ilm-policy.json, subPath: ilm-policy.json}
+            - {name: config, mountPath: /pipeline/elasticsearch/index-template.json, subPath: index-template.json}
+            - {name: config, mountPath: /pipeline/kibana/deception.ndjson, subPath: deception.ndjson}
+      volumes:
+        - name: config
+          configMap: {name: {{ $name }}-elk-config}
+{{- end }}

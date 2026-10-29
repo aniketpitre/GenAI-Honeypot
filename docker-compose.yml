@@ -1,52 +1,160 @@
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ports:
-      - "9200:9200"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
+# Profiles:  (default) core: postgres + api + canary-listener + ui
+#            honeypot:   generator (init job) + SSH/web honeypot + filebeat
+#            elk:        elasticsearch + logstash + kibana (+ one-shot setup)
+# Everything:  docker compose --profile honeypot --profile elk up -d --build
+name: deception
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.14.0
-    container_name: logstash
+x-hardened: &hardened
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  read_only: true
+  tmpfs: [/tmp]
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: deception
+      POSTGRES_USER: deception
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deception"]
+      interval: 10s
+      retries: 5
+
+  api:
+    <<: *hardened
+    build: ./services/api
+    environment:
+      DATABASE_URL: postgresql+psycopg://deception:${POSTGRES_PASSWORD}@postgres:5432/deception
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?set ADMIN_TOKEN in .env}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?set INTERNAL_API_KEY in .env}
+      CANARY_BASE_URL: ${CANARY_BASE_URL:-http://localhost:8081}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-}
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
     depends_on:
-      - elasticsearch
+      postgres: {condition: service_healthy}
+    mem_limit: 256m
+
+  canary-listener:
+    <<: *hardened
+    build: ./services/canary-listener
+    environment:
+      API_URL: http://api:8080
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-0}
+    ports: ["8081:8081"]
+    depends_on:
+      api: {condition: service_healthy}
+    mem_limit: 128m
+
+  ui:
+    <<: *hardened
+    build: ./services/ui
+    ports: ["127.0.0.1:3000:8080"]
+    tmpfs: [/tmp, /var/cache/nginx]
+    depends_on:
+      api: {condition: service_healthy}
+    mem_limit: 64m
+
+  # ---- honeypot profile -------------------------------------------------------
+  generator:
+    profiles: [honeypot]
+    build: ./services/generator
+    environment:
+      API_URL: http://api:8080
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+    volumes: [seed:/seed]
+    depends_on:
+      api: {condition: service_healthy}
+    restart: "no"
+
+  honeypot:
+    profiles: [honeypot]
+    build: ./services/honeypot
+    restart: unless-stopped
     ports:
-      - "5044:5044"
+      - "${HONEYPOT_SSH_PORT:-2222}:22"
+      - "${HONEYPOT_HTTP_PORT:-8088}:80"
     volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
-      - ./:/workspace:ro
+      - seed:/seed:ro
+      - honeypot-logs:/var/log/honeypot
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, KILL, SETUID, SETGID, SYS_CHROOT, AUDIT_WRITE, NET_BIND_SERVICE]
+    depends_on:
+      generator: {condition: service_completed_successfully}
+    mem_limit: 256m
+    pids_limit: 256
+
+  filebeat:
+    profiles: [honeypot]
+    image: docker.elastic.co/beats/filebeat:8.14.0
+    restart: unless-stopped
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./pipeline/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - honeypot-logs:/var/log/honeypot:ro
+    mem_limit: 256m
+
+  # ---- elk profile ------------------------------------------------------------
+  elasticsearch:
+    profiles: [elk]
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"   # dev only - enable + set credentials for production
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports: ["127.0.0.1:9200:9200"]
+    volumes: [esdata:/usr/share/elasticsearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      retries: 10
+    mem_limit: 1g
 
   kibana:
+    profiles: [elk]
     image: docker.elastic.co/kibana/kibana:8.14.0
-    container_name: kibana
-    depends_on:
-      - elasticsearch
+    restart: unless-stopped
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - XPACK_SECURITY_ENABLED=false
-    ports:
-      - "5601:5601"
-
-  genai-honeypot:
-    build: .
-    container_name: honeypot-test
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports: ["127.0.0.1:5601:5601"]
     depends_on:
-      - logstash
-    ports:
-      - "2223:22"
-      - "80:80"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+      elasticsearch: {condition: service_healthy}
+    mem_limit: 1g
+
+  elk-setup:
+    profiles: [elk]
+    image: curlimages/curl:8.10.1
+    entrypoint: ["sh", "/pipeline/setup.sh"]
+    volumes: ["./pipeline:/pipeline:ro"]
+    depends_on:
+      elasticsearch: {condition: service_healthy}
+    restart: "no"
+
+  logstash:
+    profiles: [elk]
+    image: docker.elastic.co/logstash/logstash:8.14.0
+    restart: unless-stopped
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+    volumes: ["./pipeline/logstash/pipeline:/usr/share/logstash/pipeline:ro"]
+    depends_on:
+      elk-setup: {condition: service_completed_successfully}
+    mem_limit: 768m
 
 volumes:
+  pgdata:
   esdata:
-    driver: local
+  seed:
+  honeypot-logs:

@@ -1,0 +1,33 @@
+{
+  "persona": "Debian Web Server",
+  "files": [
+    {
+      "path": "/var/log/auth.log",
+      "prompt": "Generate a realistic Debian /var/log/auth.log file for a web server in October 2025. Include several successful admin logins and numerous failed brute-force SSH attempts from various IPs. Use authentic log formats and plausible timestamps. Output only the file contents."
+    },
+    {
+      "path": "/home/sysadmin/.bash_history",
+      "prompt": "Generate a plausible .bash_history for a sysadmin on a Debian web server. Include package management, user management, log inspection, and web server maintenance commands. Use realistic command sequences and occasional mistakes. Output only the file contents."
+    },
+    {
+      "path": "/home/sysadmin/todo.txt",
+      "prompt": "Generate a plausible to-do list for a sysadmin managing a Debian web server. Include tasks related to security, updates, backups, and web server configuration. Use a casual, realistic style. Output only the file contents."
+    }
+  ],
+  "breadcrumbs": [
+    {
+      "file": "/home/sysadmin/.bash_history",
+      "name": "Honeypot breadcrumb: offsite backup fetch",
+      "type": "url",
+      "external_key": "honeypot-bash-history-backup",
+      "line": "curl -sSL -o /tmp/prod-db-backup.tgz {url}"
+    },
+    {
+      "file": "/home/sysadmin/todo.txt",
+      "name": "Honeypot breadcrumb: credentials sheet",
+      "type": "url",
+      "external_key": "honeypot-todo-creds-sheet",
+      "line": "- move prod creds out of {url} before the audit"
+    }
+  ]
+}

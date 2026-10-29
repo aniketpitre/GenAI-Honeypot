@@ -1,0 +1,45 @@
+{{- $sel := dict "root" . "component" "ui" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dp.fullname" . }}-ui
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ui.replicas }}
+  selector:
+    matchLabels: {{- include "dp.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "dp.selector" $sel | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- include "dp.pullSecrets" . | nindent 6 }}
+      {{- include "dp.podSecurity" (dict "uid" 101) | nindent 6 }}
+      containers:
+        - name: ui
+          image: {{ include "dp.image" (dict "root" . "name" "ui") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports: [{name: http, containerPort: 8080}]
+          env:
+            - {name: API_UPSTREAM, value: {{ printf "%s-api:8080" (include "dp.fullname" .) | quote }}}
+          readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 20}
+          resources: {{- toYaml .Values.ui.resources | nindent 12 }}
+          {{- include "dp.containerSecurity" . | nindent 10 }}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+            - {name: cache, mountPath: /var/cache/nginx}
+            - {name: conf, mountPath: /etc/nginx/conf.d}
+      volumes:
+        - {name: tmp, emptyDir: {}}
+        - {name: cache, emptyDir: {}}
+        - {name: conf, emptyDir: {}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dp.fullname" . }}-ui
+  labels: {{- include "dp.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "dp.selector" $sel | nindent 4 }}
+  ports: [{name: http, port: 8080, targetPort: http}]
