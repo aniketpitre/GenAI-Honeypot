@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HoneyToken, Alert, Stats, View } from './types';
 import { ICONS } from './constants';
-import { api, auth, AuthError } from './services/api';
+import { api, auth, AuthError, subscribeAlerts } from './services/api';
 import Dashboard from './components/Dashboard';
 import TokenManager from './components/TokenManager';
 import CreateTokenModal from './components/CreateTokenModal';
 import Login from './components/Login';
 
-const POLL_MS = 5000;
+const POLL_MS = 30000; // safety net; new alerts arrive instantly over the SSE stream
 
 const App: React.FC = () => {
   const [authed, setAuthed] = useState(!!auth.get());
@@ -45,8 +45,9 @@ const App: React.FC = () => {
     if (!authed) return;
     refresh();
     const id = setInterval(refresh, POLL_MS);
-    return () => clearInterval(id);
-  }, [authed, refresh]);
+    const unsubscribe = subscribeAlerts(refresh, () => logout('Invalid admin token'));
+    return () => { clearInterval(id); unsubscribe(); };
+  }, [authed, refresh, logout]);
 
   const guarded = async (fn: () => Promise<unknown>) => {
     try { await fn(); await refresh(); } catch (e) {

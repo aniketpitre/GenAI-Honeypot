@@ -43,3 +43,44 @@ export const api = {
     (await json<{ urls: string[] }>('/generate/urls', { method: 'POST', ...body({ prompt }) })).urls,
   downloadToken: async (id: string): Promise<Blob> => (await request(`/tokens/${id}/download`)).blob(),
 };
+
+/**
+ * Subscribe to server-sent "alert" events. EventSource can't send an
+ * Authorization header, so this reads the stream with fetch. Reconnects with
+ * backoff until the returned function is called.
+ */
+export function subscribeAlerts(onAlert: () => void, onAuthError: () => void): () => void {
+  const ctrl = new AbortController();
+  let delay = 1000;
+  (async () => {
+    while (!ctrl.signal.aborted) {
+      try {
+        const res = await fetch(`${BASE}/stream`, {
+          headers: { Authorization: `Bearer ${auth.get() ?? ''}` },
+          signal: ctrl.signal,
+        });
+        if (res.status === 401) { onAuthError(); return; }
+        if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
+        delay = 1000;
+        const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+        let buf = '';
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += value;
+          let i: number;
+          while ((i = buf.indexOf('\n\n')) >= 0) {
+            const frame = buf.slice(0, i);
+            buf = buf.slice(i + 2);
+            if (frame.includes('event: alert')) onAlert();
+          }
+        }
+      } catch {
+        if (ctrl.signal.aborted) return;
+      }
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay * 2, 15000);
+    }
+  })();
+  return () => ctrl.abort();
+}

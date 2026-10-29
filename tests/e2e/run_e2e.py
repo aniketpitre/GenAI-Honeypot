@@ -67,8 +67,22 @@ def main() -> None:
         todo = (tmp / "seed/home/sysadmin/todo.txt").read_text()
         trap = next(w for w in todo.split() if "/t/" in w)
 
+        # live push: an SSE client must be told about the hit without polling
+        import threading
+        got = threading.Event()
+
+        def listen():
+            with httpx.stream("GET", f"{API}/api/v1/stream", headers=h, timeout=30) as resp:
+                for line in resp.iter_lines():
+                    if line.startswith("event: alert"):
+                        got.set()
+                        return
+
+        threading.Thread(target=listen, daemon=True).start()
+        time.sleep(1)
         r = httpx.get(trap)
         check(r.status_code == 403, "trap link returns decoy 403")
+        check(got.wait(5), "SSE client received the alert event within 5s")
         time.sleep(1)
         alerts = httpx.get(f"{API}/api/v1/alerts", headers=h).json()
         check(len(alerts) == 1 and alerts[0]["ip"] == "127.0.0.1", "hit became an alert with client IP")

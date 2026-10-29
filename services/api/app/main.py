@@ -3,7 +3,10 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 
+import asyncio
+
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Response
+from fastapi.responses import StreamingResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +22,7 @@ from .events import canary_event, publish
 from .geo import lookup
 from .metrics import HITS
 from .migrate import run_migrations
+from .realtime import announce_alert, broker, event_stream, pg_listener
 from .schemas import (
     AlertOut, AlertUpdate, GenerateUrlsIn, HitIn, TokenCreate, TokenOut, TokenUpdate,
 )
@@ -42,7 +46,12 @@ async def lifespan(app: FastAPI):
             raise RuntimeError(f"{name} must be at least {MIN_SECRET_LEN} characters (try: openssl rand -hex 32)")
     if dbm._engine is None:  # tests pre-initialise an in-memory engine
         run_migrations(dbm.get_engine())
+    listener = None
+    if s.database_url.startswith("postgresql"):
+        listener = asyncio.create_task(pg_listener(s.database_url))
     yield
+    if listener:
+        listener.cancel()
 
 
 app = FastAPI(title="Deception Platform API", version="0.1.0", lifespan=lifespan)
@@ -198,6 +207,15 @@ def stats(db: Session = Depends(get_db)):
     }
 
 
+@app.get("/api/v1/stream", dependencies=[Depends(require_admin)])
+async def stream():
+    """Server-sent events: `event: alert` whenever a new alert is stored."""
+    return StreamingResponse(
+        event_stream(broker.subscribe()), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 @app.get("/api/v1/alerts", response_model=list[AlertOut], dependencies=[Depends(require_admin)])
 def list_alerts(
     status: str | None = None, limit: int = Query(200, ge=1, le=1000), db: Session = Depends(get_db),
@@ -246,5 +264,6 @@ async def record_hit(hit: HitIn, bg: BackgroundTasks, db: Session = Depends(get_
         HITS.labels("duplicate").inc()
         return {"recorded": True}
     HITS.labels("recorded").inc()
+    announce_alert(db, alert.id)
     bg.add_task(publish, canary_event(token, alert))
     return {"recorded": True}
