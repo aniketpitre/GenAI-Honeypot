@@ -1,5 +1,6 @@
 import logging
 import secrets
+from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Response
@@ -13,6 +14,7 @@ from . import db as dbm
 from .config import Settings, get_settings
 from .db import Alert, Token, get_db
 from .docx_canary import build_docx
+from .lures import aws_credentials, kubeconfig
 from .events import canary_event, publish
 from .geo import lookup
 from .metrics import HITS
@@ -57,7 +59,13 @@ if _s.cors_origins:
 
 def trap_url(token: Token, s: Settings) -> str:
     base = s.canary_base_url.rstrip("/")
-    return f"{base}/p/{token.id}.png" if token.type in ("pixel", "document") else f"{base}/t/{token.id}"
+    if token.type in ("pixel", "document"):
+        return f"{base}/p/{token.id}.png"
+    if token.type == "aws":
+        return f"{base}/aws/{token.id}"
+    if token.type == "kubeconfig":
+        return f"{base}/k8s/{token.id}"
+    return f"{base}/t/{token.id}"
 
 
 def token_out(token: Token, count: int, s: Settings) -> TokenOut:
@@ -151,20 +159,45 @@ def delete_token(token_id: str, db: Session = Depends(get_db)):
     db.commit()
 
 
+DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
 @app.get("/api/v1/tokens/{token_id}/download", dependencies=[Depends(require_admin)])
 def download_token(token_id: str, db: Session = Depends(get_db), s: Settings = Depends(get_settings)):
     token = _get_token(db, token_id)
-    if token.type != "document":
-        raise HTTPException(400, "only document tokens can be downloaded")
-    data = build_docx(trap_url(token, s), token.name)
-    return Response(
-        data,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={"Content-Disposition": f'attachment; filename="{token.id}.docx"'},
-    )
+    url = trap_url(token, s)
+    if token.type == "document":
+        data, mime, name = build_docx(url, token.name), DOCX_MIME, f"{token.id}.docx"
+    elif token.type == "aws":
+        data, mime, name = aws_credentials(url).encode(), "text/plain", "credentials"
+    elif token.type == "kubeconfig":
+        data, mime, name = kubeconfig(url).encode(), "application/yaml", "kubeconfig"
+    else:
+        raise HTTPException(400, "this token type has nothing to download")
+    return Response(data, media_type=mime, headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
 
 # ---- alerts -----------------------------------------------------------------
+@app.get("/api/v1/stats", dependencies=[Depends(require_admin)])
+def stats(db: Session = Depends(get_db)):
+    now = datetime.now(timezone.utc)
+    day_ago = now - timedelta(hours=24)
+    total = db.scalar(select(func.count()).select_from(Alert)) or 0
+    last_24h = db.scalar(select(func.count()).select_from(Alert).where(Alert.timestamp >= day_ago)) or 0
+    new = db.scalar(select(func.count()).select_from(Alert).where(Alert.status == "New")) or 0
+    active = db.scalar(select(func.count()).select_from(Token).where(Token.status == "active")) or 0
+    top = db.execute(
+        select(Alert.ip, func.count().label("n"), func.count(func.distinct(Alert.token_id)).label("tokens"),
+               func.max(Alert.country).label("country"))
+        .group_by(Alert.ip).order_by(func.count().desc()).limit(5)
+    ).all()
+    return {
+        "total_alerts": total, "alerts_24h": last_24h, "new_alerts": new, "active_tokens": active,
+        # An IP touching several different tokens is the strongest signal of a real intruder.
+        "top_sources": [{"ip": r.ip, "alerts": r.n, "distinct_tokens": r.tokens, "country": r.country} for r in top],
+    }
+
+
 @app.get("/api/v1/alerts", response_model=list[AlertOut], dependencies=[Depends(require_admin)])
 def list_alerts(
     status: str | None = None, limit: int = Query(200, ge=1, le=1000), db: Session = Depends(get_db),

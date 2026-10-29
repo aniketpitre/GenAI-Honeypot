@@ -91,3 +91,25 @@ def test_metrics_endpoint(client):
     client.post("/internal/v1/hits", headers=INTERNAL, json={"token_id": t["id"], "ip": "8.8.8.8"})
     text = client.get("/metrics").text
     assert 'deception_hits_total{result="recorded"}' in text
+
+
+def test_aws_and_kubeconfig_lures(client):
+    a = make_token(client, type="aws", name="AWS prod")
+    assert a["value"] == f"https://canary.test/aws/{a['id']}"
+    r = client.get(f"/api/v1/tokens/{a['id']}/download", headers=ADMIN)
+    assert r.status_code == 200 and "aws_access_key_id = AKIA" in r.text
+    assert f"endpoint_url = https://canary.test/aws/{a['id']}" in r.text
+    k = make_token(client, type="kubeconfig", name="k8s prod")
+    r = client.get(f"/api/v1/tokens/{k['id']}/download", headers=ADMIN)
+    assert f"server: https://canary.test/k8s/{k['id']}" in r.text and "kind: Config" in r.text
+    assert client.get(f"/api/v1/tokens/{make_token(client)['id']}/download", headers=ADMIN).status_code == 400
+
+
+def test_stats_flags_ip_hitting_several_tokens(client):
+    t1, t2 = make_token(client, name="a"), make_token(client, name="b")
+    for t in (t1, t2):
+        client.post("/internal/v1/hits", headers=INTERNAL, json={"token_id": t["id"], "ip": "203.0.113.5"})
+    client.post("/internal/v1/hits", headers=INTERNAL, json={"token_id": t1["id"], "ip": "198.51.100.7"})
+    s = client.get("/api/v1/stats", headers=ADMIN).json()
+    assert s["total_alerts"] == 3 and s["alerts_24h"] == 3 and s["new_alerts"] == 3 and s["active_tokens"] == 2
+    assert s["top_sources"][0] == {"ip": "203.0.113.5", "alerts": 2, "distinct_tokens": 2, "country": ""}

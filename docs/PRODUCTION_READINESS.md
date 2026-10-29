@@ -37,13 +37,13 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 - ⬜ Multiple honeypot personas/replicas (web, DB, FTP) as separate Deployments via values.
 
 ## 4. Observability
-- ✅ Prometheus `/metrics` on API and listener (`deception_hits_total`, `canary_hits_total{outcome}`, `canary_spool_size`, event publish failures) with scrape annotations in the chart. ⬜ Grafana dashboard + alert rules (e.g. `canary_spool_size > 0` for 5 m).
+- ✅ Prometheus `/metrics` on API and listener (`deception_hits_total`, `canary_hits_total{outcome}`, `canary_spool_size`, event publish failures) with scrape annotations in the chart. ✅ Optional PrometheusRule (spool backlog, dropped hits, event-publish failures) and Grafana dashboard ConfigMap in the chart (`monitoring.*`; rules/dashboard not run against a live Prometheus/Grafana).
 - ⬜ Structured JSON application logs with request IDs; OpenTelemetry traces.
 - ⬜ Self-monitoring canary: a synthetic token hit on a schedule to prove the whole path works end-to-end.
 
 ## 5. Detection quality (product improvements)
-- ⬜ More token types: DNS tokens (needs authoritative NS), fake AWS keys (CloudTrail/`GetCallerIdentity` detection), fake DB creds, QR/PDF/XLSX, `.git` config and `.env` lures, Kubernetes service-account bait.
-- ⬜ Dedup/grouping and severity scoring (same IP across tokens ⇒ one incident); suppress known scanners and your own security tools (allow-list, "false positive" learning).
+- ✅ Fake AWS credentials file (via `endpoint_url`) and fake kubeconfig tokens. ⬜ DNS tokens (needs authoritative NS), real-AWS-account decoy keys detected via CloudTrail, fake DB creds, QR/PDF/XLSX, `.git`/`.env` lures.
+- 🟡 `/api/v1/stats` + dashboard summary highlight IPs that hit several different tokens. ⬜ Full incident grouping/severity scoring; suppress known scanners and your own security tools (allow-list).
 - ⬜ MaxMind GeoLite2 + ASN/Tor/VPN/cloud-provider enrichment (supported via `GEOIP_DB_PATH`, DB not bundled — licence).
 - ⬜ Email-client/AV pre-fetch detection (pixels fire from scanners; tag by UA/ASN to cut false positives).
 - ⬜ Interactive honeypot: LLM-backed shell (e.g. Cowrie fork) so attackers can run commands, with strict output filtering and cost caps. Today the bait is static.
@@ -53,7 +53,7 @@ Legend: ✅ done in this change · 🟡 partial · ⬜ todo. "Unverified" = writ
 ## 6. Delivery
 - ✅ CI: unit tests (3 Python services), UI typecheck+build, compose/Helm lint + kubeconform schema check, image builds, chart/pipeline drift check; tag-triggered image publish to GHCR.
 - ✅ `tests/e2e/run_e2e.py` (CI job `e2e`): real processes, generator breadcrumb → trap hit → alert, plus API-outage spool recovery. ⬜ Same flow against `docker compose up`, and a kind-cluster install of the chart.
-- ⬜ Playwright smoke test for the dashboard; typed API client generated from the OpenAPI schema.
+- 🟡 Browser smoke script `tests/e2e/ui_smoke.cjs` (manual; not in CI yet) caught a real UI bug (alert cards invisible). ⬜ Run it in CI; typed API client generated from the OpenAPI schema.
 - ⬜ Helm chart publishing (OCI) and a `values.production.yaml` example; Argo CD/Flux manifests.
 - ⬜ Test the Logstash grok patterns with `logstash -t` / pipeline unit tests; confirm the Kibana saved-objects import on a real 8.14 instance (**unverified**).
 

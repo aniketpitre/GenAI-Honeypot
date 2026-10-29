@@ -13,6 +13,8 @@ interface CreateTokenModalProps {
 const HINTS: Record<Exclude<TokenType, 'url'>, string> = {
   pixel: 'A unique 1x1 tracking pixel URL. Embed it in an email, web page or document; fetching it raises an alert.',
   document: 'A Word document that loads a remote image when opened. Download it from the Token Manager and plant it as bait.',
+  aws: 'A fake ~/.aws/credentials profile (inert random keys) whose endpoint_url points at the canary. Any aws-cli/SDK call using it raises an alert and records the decoy access key id. Plant it in a repo, a wiki or a dev laptop.',
+  kubeconfig: 'A fake kubeconfig whose API server is the canary. kubectl, k9s or any client library using it raises an alert. Plant it where attackers look for cluster access.',
 };
 
 const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ isOpen, onClose, onCreate }) => {

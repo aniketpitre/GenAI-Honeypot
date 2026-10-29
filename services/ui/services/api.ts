@@ -1,4 +1,4 @@
-import { Alert, AlertStatus, HoneyToken, TokenType } from '../types';
+import { Alert, AlertStatus, HoneyToken, Stats, TokenType } from '../types';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '/api/v1';
 const KEY = 'tripwire.adminToken';
@@ -30,6 +30,7 @@ const body = (b: unknown): RequestInit => ({ body: JSON.stringify(b) });
 
 export const api = {
   getTokens: () => json<HoneyToken[]>('/tokens'),
+  getStats: () => json<Stats>('/stats'),
   getAlerts: () => json<Alert[]>('/alerts?limit=500'),
   createToken: (t: { name: string; type: TokenType; decoy_url?: string }) =>
     json<HoneyToken>('/tokens', { method: 'POST', ...body(t) }),

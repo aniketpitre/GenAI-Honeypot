@@ -1,4 +1,4 @@
-export type TokenType = 'url' | 'pixel' | 'document';
+export type TokenType = 'url' | 'pixel' | 'document' | 'aws' | 'kubeconfig';
 export type TokenStatus = 'active' | 'disabled';
 export type AlertStatus = 'New' | 'Investigating' | 'False Positive' | 'Resolved';
 
@@ -6,6 +6,8 @@ export const TOKEN_TYPE_LABELS: Record<TokenType, string> = {
   url: 'Fake URL',
   pixel: 'Tracking Pixel',
   document: 'Word Document',
+  aws: 'Fake AWS Keys',
+  kubeconfig: 'Fake Kubeconfig',
 };
 
 export interface HoneyToken {
@@ -37,3 +39,11 @@ export interface Alert {
 }
 
 export type View = 'dashboard' | 'tokens';
+
+export interface Stats {
+  total_alerts: number;
+  alerts_24h: number;
+  new_alerts: number;
+  active_tokens: number;
+  top_sources: { ip: string; alerts: number; distinct_tokens: number; country: string }[];
+}
