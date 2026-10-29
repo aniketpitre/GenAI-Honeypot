@@ -47,7 +47,7 @@ jobs:
           docker compose --profile honeypot --profile elk config --quiet
       - name: chart copies of pipeline/ are in sync
         run: make sync-chart && git diff --exit-code deploy/helm
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v5
       - name: alert rules unit tests (promtool)
         run: ./tests/prometheus/run.sh
       - name: helm lint + schema-validate
