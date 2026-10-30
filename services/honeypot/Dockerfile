@@ -1,6 +1,6 @@
 # Honeypot sensor: SSH + web lure. Contains NO secrets and NO log shipper;
 # logs go to /var/log/honeypot, which a Filebeat sidecar reads.
-FROM ubuntu:22.04
+FROM ubuntu:25.10
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
